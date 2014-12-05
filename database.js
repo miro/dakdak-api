@@ -28,7 +28,6 @@ bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
         return bookshelf.knex.schema.createTable('organisations', function(t) {
             t.increments('id').primary();
             t.string('name', 50);
-            console.log("jeah");
         });
     }
 });
