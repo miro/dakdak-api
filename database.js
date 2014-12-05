@@ -10,7 +10,6 @@ var dbConfig = {
     }
 };
 
-
 var Promise = require('bluebird');
 var knex = require('knex')(dbConfig);
 var bookshelf = require('bookshelf')(knex);
@@ -20,7 +19,7 @@ var bcrypt = Promise.promisifyAll(require('bcrypt'));
 
 
 
-
+// # Init the database
 
 // Organisations
 bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
@@ -95,5 +94,23 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
         });
     }
 });
+
+// # Define models
+var models = {};
+
+models.Image = bookshelf.Model.extend({
+    tableName: 'images'
+});
+
+models.Person = bookshelf.Model.extend({
+    tableName: 'persons'
+});
+
+
+
+module.exports = {
+    bookshelf: bookshelf,
+    models: models
+}
 
 
