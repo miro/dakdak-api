@@ -1,17 +1,7 @@
-var dbConfig = {
-    client: 'postgresql',
-    connection: {
-        host: 'localhost',
-        user: 'dakdak',
-        port: 5432,
-        password: 'dakdak',
-        database: 'dakdak',
-        charset: 'utf8'
-    }
-};
+var config = require('./config.js');
 
 var Promise = require('bluebird');
-var knex = require('knex')(dbConfig);
+var knex = require('knex')(config.dbConfig);
 var bookshelf = require('bookshelf')(knex);
 var bcrypt = Promise.promisifyAll(require('bcrypt'));
 
@@ -101,9 +91,14 @@ var models = {};
 models.Image = bookshelf.Model.extend({
     tableName: 'images'
 });
-
 models.Person = bookshelf.Model.extend({
     tableName: 'persons'
+});
+models.Spot = bookshelf.Model.extend({
+    tableName: 'spots'
+});
+models.Organisation = bookshelf.Model.extend({
+    tableName: 'organisations'
 });
 
 
