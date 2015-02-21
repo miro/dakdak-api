@@ -1,4 +1,4 @@
-var config = require('./config.js');
+var config = require('./configurator.js');
 
 var Promise = require('bluebird');
 var knex = require('knex')(config.dbConfig);
@@ -58,6 +58,7 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
             t.string('email', 100);
             t.string('displayName', 50);
             t.string('password', 60);
+            t.integer('accessLevel').defaultTo(0);
 
             t.integer('personId')
                 .unsigned()
