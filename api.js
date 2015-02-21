@@ -21,17 +21,16 @@ var _generateUUID = (function() {
 
 module.exports = function(app) {
     // # Person
-    app.get('/api/v0/persons', function(req, res) {
+    app.get('/api/v0/persons', function(req, res, next) {
         new db.models.Person().fetchAll()
         .then(function(images) {
             res.send(images.toJSON());
         }).catch(function(error) {
-            console.log(error);
-            res.send('An error occured');
+            return next(new Error(error));
         });
     });
 
-    app.post('/api/v0/person', function(req, res) {
+    app.post('/api/v0/person', function(req, res, next) {
         var person = new db.models.Person({
             fullName: req.body.fullName,
             displayName: req.body.displayName
@@ -43,7 +42,7 @@ module.exports = function(app) {
 
 
     // # S3
-    app.get('/api/v0/s3link', function(req, res){
+    app.get('/api/v0/s3link', function(req, res, next) {
         var objectUUID = _generateUUID();
 
         var s3 = new aws.S3(); 
@@ -53,11 +52,11 @@ module.exports = function(app) {
             Expires: 60, 
             ContentType: req.query.s3_object_type, 
             ACL: 'public-read'
-        }; 
-        s3.getSignedUrl('putObject', s3_params, function(err, data){ 
-            if (err) { 
-                console.log(err); 
-            }
+        };
+
+
+        s3.getSignedUrl('putObject', s3_params, function(err, data) {
+            if (err) return next(new Error(err));
             else { 
                 var return_data = {
                     signed_request: data,

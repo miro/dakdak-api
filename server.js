@@ -22,21 +22,43 @@ app.use(function allowCrossDomain(req, res, next) {
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
 
+
 // # S3 setup
 aws.config.update({accessKeyId: config.s3Config.key, secretAccessKey: config.s3Config.secret });
 
 
+// #### Routes
+//
 
-
-
-
-
-
-// #### API
+// API
 require('./api')(app);
 
+// Catch all 404 route (this needs to be last)
+app.get('*', function(req, res, next) {
+    var err = new Error();
+    err.status = 404;
+    next(err);
+});
 
 
+
+
+// ## Error handlers
+app.use(function handle404(err, req, res, next) { // 404
+    if (err.status !== 404) return next(err);
+    res.send(err.message || '404 Content not found - but such are the mysteries of the Internet sometimes');
+});
+
+app.use(function genericErrorHandler(err, req, res, next) { // 500
+
+    if (_.isUndefined(err.status)) {
+        err.status = 500;
+    }
+
+    console.log(err, req); // log the error
+
+    res.status(err.status).send('AYBABTU'); // send response
+});
 
 
 // # Start the server
