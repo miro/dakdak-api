@@ -11,9 +11,9 @@ var dbConfig = {
 };
 
 var s3Config = {
-    bucket: 'dakdak'
-    key: '',
-    secret: ''
+    bucket: 'bucket',
+    key: process.env.DAKDAK_S3_KEY,
+    secret: process.env.DAKDAK_S3_SECRET
 };
 
 
