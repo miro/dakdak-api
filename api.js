@@ -1,7 +1,7 @@
 
 module.exports = function(app) {
     // # Person
-    app.get('/api/persons', function(req, res) {
+    app.get('/api/v0/persons', function(req, res) {
         new db.models.Person().fetchAll()
         .then(function(images) {
             res.send(images.toJSON());
@@ -11,7 +11,7 @@ module.exports = function(app) {
         });
     });
 
-    app.post('/api/person', function(req, res) {
+    app.post('/api/v0/person', function(req, res) {
         var person = new db.models.Person({
             fullName: req.body.fullName,
             displayName: req.body.displayName
@@ -23,7 +23,7 @@ module.exports = function(app) {
 
 
     // # S3
-    app.get('/api/s3link', function(req, res){
+    app.get('/api/v0/s3link', function(req, res){
         var objectUUID = _generateUUID();
 
         var s3 = new aws.S3(); 
