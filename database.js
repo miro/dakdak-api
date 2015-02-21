@@ -51,7 +51,21 @@ bookshelf.knex.schema.hasTable('spots').then(function(exists) {
 
 
 // Users
-// TODO
+bookshelf.knex.schema.hasTable('users').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('users', function(t) {
+            t.increments('id').primary();
+            t.string('email', 100);
+            t.string('displayName', 50);
+            t.string('password', 60);
+
+            t.integer('personId')
+                .unsigned()
+                .references('id').inTable('persons')
+                .onDelete('SET NULL');
+        });
+    }
+});
 
 
 // Images
@@ -96,6 +110,9 @@ models.Person = bookshelf.Model.extend({
 });
 models.Spot = bookshelf.Model.extend({
     tableName: 'spots'
+});
+models.User = bookshelf.Model.extend({
+    tableName: 'users'
 });
 models.Organisation = bookshelf.Model.extend({
     tableName: 'organisations'
