@@ -5,7 +5,7 @@ var aws = require('aws-sdk');
 
 var app = express();
 var db = require('./database.js');
-var config = require('./config.js');
+var config = require('./configurator.js');
 
 
 // ### Config
