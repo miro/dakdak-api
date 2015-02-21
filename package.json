@@ -24,6 +24,7 @@
     "body-parser": "~1.10.0",
     "bluebird": "~2.3.11",
     "bcrypt": "~0.8.0",
-    "aws-sdk": "~2.0.30"
+    "aws-sdk": "~2.0.30",
+    "lodash": "~3.3.0"
   }
 }

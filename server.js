@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var Promise = require('bluebird');
 var aws = require('aws-sdk');
+var _ = require('lodash');
 
 var app = express();
 var db = require('./database.js');
