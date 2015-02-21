@@ -81,24 +81,24 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
 
             t.integer('riderId')
                 .unsigned()
-                .references('id')
-                .inTable('persons')
+                .references('id').inTable('persons')
                 .onDelete('SET NULL');
 
             t.integer('photographerId')
                 .unsigned()
-                .references('id')
-                .inTable('persons')
+                .references('id').inTable('persons')
                 .onDelete('SET NULL');
 
             t.integer('spotId')
                 .unsigned()
-                .references('id')
-                .inTable('spots')
+                .references('id').inTable('spots')
                 .onDelete('SET NULL');
         });
     }
 });
+
+
+
 
 // # Define models
 var models = {};

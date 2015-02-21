@@ -43,6 +43,7 @@ var _generateUUID = (function() {
 
 
 // #### Routes
+// TODO: API to separate file
 
 // # Person
 app.get('/api/persons', function(req, res) {
@@ -65,6 +66,7 @@ app.post('/api/person', function(req, res) {
     res.send(person.toJSON());
 });
 
+
 // # S3
 app.get('/api/s3link', function(req, res){
     var objectUUID = _generateUUID();
@@ -78,7 +80,7 @@ app.get('/api/s3link', function(req, res){
         ACL: 'public-read'
     }; 
     s3.getSignedUrl('putObject', s3_params, function(err, data){ 
-        if (err){ 
+        if (err) { 
             console.log(err); 
         }
         else { 
