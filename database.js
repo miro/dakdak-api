@@ -77,6 +77,7 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
             t.string('description', 350);
             t.date('date');
             t.string('themeColor', 10);
+            t.boolean('published').defaultTo(false);
 
             t.integer('riderId')
                 .unsigned()
