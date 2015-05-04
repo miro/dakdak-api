@@ -18,18 +18,30 @@ var _generateUUID = (function() {
     };
 })();
 
+var _handleResult = function(result, res, next) {
+    try {
+        res.send(result.toJSON());
+    }
+    catch (error) {
+        return next(new Error(error));
+    }
+};
+
 
 module.exports = function(app) {
-    // # Person
-    app.get('/api/v0/persons', function(req, res, next) {
+    // # Basic bulk fetches
+    app.get('/api/v0/person', function(req, res, next) {
         new db.models.Person().fetchAll()
-        .then(function(images) {
-            res.send(images.toJSON());
-        }).catch(function(error) {
-            return next(new Error(error));
-        });
+        .then(function(result) { _handleResult(result, res, next); });
+    });
+    app.get('/api/v0/spot', function(req, res, next) {
+        new db.models.Spot().fetchAll()
+        .then(function(result) { _handleResult(result, res, next); });
     });
 
+
+
+    // Create person
     app.post('/api/v0/person', function(req, res, next) {
         var person = new db.models.Person({
             fullName: req.body.fullName,
