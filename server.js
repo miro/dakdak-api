@@ -1,11 +1,11 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+var multer  = require('multer');
+
 var Promise = require('bluebird');
-var aws = require('aws-sdk');
 var _ = require('lodash');
 
 var app = express();
-var db = require('./database.js');
 var config = require('./configurator.js');
 var api = require('./api.js');
 
@@ -14,17 +14,17 @@ var api = require('./api.js');
 
 // # Express middleware
 app.use(function allowCrossDomain(req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*'); // hox fix url
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // HOX dev solution
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
+app.use(multer()); // handle multiplart data
 
 
 // # S3 setup
-aws.config.update({accessKeyId: config.s3Config.key, secretAccessKey: config.s3Config.secret });
 
 
 // #### Routes
@@ -50,18 +50,17 @@ app.use(function handle404(err, req, res, next) { // 404
 });
 
 app.use(function genericErrorHandler(err, req, res, next) { // 500
-
     if (_.isUndefined(err.status)) {
         err.status = 500;
     }
 
-    console.log(err, req); // log the error
+    console.log(err); // log the error
 
-    res.status(err.status).send('AYBABTU'); // send response
+    res.status(err.status).send(err); // send response
 });
 
 
 // # Start the server
-app.listen(3000, function() {
-    console.log('Dakdak backend started at port 3000');
+app.listen(5000, function() {
+    console.log('Dakdak backend started at port 5000');
 });

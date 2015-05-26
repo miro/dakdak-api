@@ -1,6 +1,9 @@
 // # Imports
 var aws = require('aws-sdk');
+var Promise = require('bluebird');
+var _       = require('lodash');
 var config = require('./configurator.js');
+var db = require('./database.js');
 
 
 
@@ -27,6 +30,46 @@ var _handleResult = function(result, res, next) {
     }
 };
 
+var _deleteItem = function(type, id) {
+    return new Promise(function(resolve, reject) {
+
+        new db.models[type]({ id: id })
+        .fetch({ require: true })
+        .then(function(model) {
+            if (model) {
+                model.destroy()
+                .then(function destroyOk() {
+                    resolve();
+                });
+            }
+            else {
+                reject('Model not found');
+            }
+        })
+        .catch(function(error) {
+            console.log('Catch on _deleteItem Pokemon block', error);
+            reject(error);
+        });
+    });
+};
+
+
+var _updateItem = function(type, id, newAttrs, res, next) {
+    return new Promise(function(resolve, reject) {
+        new db.models[type]({ id: id })
+        .fetch({ require: true })
+        .then(function (model) {
+            model.save(newAttrs, { patch: true })
+            .then(function saveOk(newModel) {
+                resolve(newModel);
+            })
+            .error(function saveNotOk(error) {
+                reject(error);
+            });
+        });
+    });
+};
+
 
 module.exports = function(app) {
     // # Basic bulk fetches
@@ -47,10 +90,80 @@ module.exports = function(app) {
             fullName: req.body.fullName,
             displayName: req.body.displayName
         });
-        person.save();
+        person.save()
+        .then(function saveOk(newPerson) {
+            res.send(newPerson.toJSON());
+        });
 
-        res.send(person.toJSON());
     });
+    // Create spot
+    app.post('/api/v0/spot', function(req, res, next) {
+        var spot = new db.models.Spot({
+            name: req.body.name
+        });
+        spot.save()
+        .then(function saveOk(newSpot) {
+            res.send(newSpot.toJSON());
+        });
+    });
+
+
+    // Update person
+    app.put('/api/v0/person/:id', function(req, res, next) {
+        console.log(req.body);
+
+        _updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
+        .then(function saveOk(model) {
+            res.send(model.toJSON());
+        })
+        .error(function saveNotOk(error) {
+            return next(new Error(error));
+        });
+    });
+
+    // Update spot
+    app.put('/api/v0/spot/:id', function(req, res, next) {
+        var attrObj = {
+            name: req.body.name,
+            location_search_string: req.body.location_search_string,
+            latitude: parseFloat(req.body.latitude) || 0.0,
+            longitude: parseFloat(req.body.longitude) ||  0.0
+        };
+        console.log(attrObj);
+
+        _updateItem('Spot', req.params.id, attrObj)
+        .then(function saveOk(model) {
+            res.send(model.toJSON());
+        })
+        .error(function saveNotOk(error) {
+            return next(new Error(error));
+        });
+    });
+
+
+    // Delete person
+    app.delete('/api/v0/person/:id', function(req, res, next) {
+        _deleteItem('Person', req.params.id)
+        .then(function deleteOk() {
+            res.sendStatus(200);
+        })
+        .error(function deleteNotOk(error) {
+            return next(new Error(error));
+        });
+    });
+
+    // Delete spot
+    app.delete('/api/v0/spot/:id', function(req, res, next) {
+        _deleteItem('Spot', req.params.id)
+        .then(function deleteOk() {
+            res.sendStatus(200);
+        })
+        .error(function deleteNotOk(error) {
+            return next(new Error(error));
+        });
+    });
+
+
 
 
     // # S3
