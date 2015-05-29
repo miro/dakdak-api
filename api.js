@@ -2,8 +2,17 @@
 var aws = require('aws-sdk');
 var Promise = require('bluebird');
 var _       = require('lodash');
+
 var config = require('./configurator.js');
 var db = require('./database.js');
+
+aws.config.update({
+    accessKeyId: config.s3Config.key,
+    secretAccessKey: config.s3Config.secret,
+    signatureVersion: 'v4',
+    region: 'eu-central-1' // required by the v4 signature
+});
+
 
 
 
