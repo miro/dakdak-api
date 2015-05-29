@@ -193,4 +193,13 @@ module.exports = function(app) {
         });
     });
 
+
+    // # Debugging
+    app.post('/api/v0/echo', function(req, res, next) {
+        console.log(req.body);
+        console.log(req.params);
+
+        res.send({body: req.body, params: req.params});
+    });
+
 }
