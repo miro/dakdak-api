@@ -19,7 +19,6 @@ aws.config.update({
 // ### Utility functions
 var _generateUUID = (function() {
     // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
        .toString(16)
@@ -101,9 +100,8 @@ module.exports = function(app) {
         });
         person.save()
         .then(function saveOk(newPerson) {
-            res.send(newPerson.toJSON());
+            _handleResult(newPerson, res, next);
         });
-
     });
     // Create spot
     app.post('/api/v0/spot', function(req, res, next) {
@@ -112,7 +110,7 @@ module.exports = function(app) {
         });
         spot.save()
         .then(function saveOk(newSpot) {
-            res.send(newSpot.toJSON());
+            _handleResult(newSpot, res, next);
         });
     });
 
@@ -123,7 +121,7 @@ module.exports = function(app) {
 
         _updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
         .then(function saveOk(model) {
-            res.send(model.toJSON());
+            _handleResult(model, res, next);
         })
         .error(function saveNotOk(error) {
             return next(new Error(error));
@@ -142,7 +140,7 @@ module.exports = function(app) {
 
         _updateItem('Spot', req.params.id, attrObj)
         .then(function saveOk(model) {
-            res.send(model.toJSON());
+            _handleResult(model, res, next);
         })
         .error(function saveNotOk(error) {
             return next(new Error(error));
@@ -208,7 +206,7 @@ module.exports = function(app) {
         console.log(req.body);
         console.log(req.params);
 
-        res.send({body: req.body, params: req.params});
+        _handleResult({body: req.body, params: req.params}, res, next);
     });
 
 }
