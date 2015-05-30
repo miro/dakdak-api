@@ -192,7 +192,8 @@ module.exports = function(app) {
             else { 
                 var return_data = {
                     signed_request: data,
-                    url: 'https://'+ config.s3Config.bucket +'.s3.amazonaws.com/' + objectUUID 
+                    url: 'https://'+ config.s3Config.bucket +'.s3.amazonaws.com/' + objectUUID,
+                    s3id: objectUUID
                 };
                 res.write(JSON.stringify(return_data));
                 res.end();
