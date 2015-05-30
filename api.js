@@ -113,6 +113,15 @@ module.exports = function(app) {
             _handleResult(newSpot, res, next);
         });
     });
+    // Create image
+    app.post('/api/v0/image', function(req, res, next) {
+        new db.models.Image({ s3id: req.body.s3id })
+        .save()
+        .then(function saveOk(newImg) {
+            _handleResult(newImg, res, next);
+        });
+    });
+
 
 
     // Update person
