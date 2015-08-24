@@ -101,6 +101,16 @@ module.exports = function(app) {
     });
 
 
+    // # Get single entity
+    //
+    // Image
+    app.get('/api/v0/image/:id', function(req, res, next) {
+        new db.models.Image()
+        .where({ id: req.params.id })
+        .fetch()
+        .then(function(result) { _handleResult(result, res, next); });
+    });
+
 
     // Create person
     app.post('/api/v0/person', function(req, res, next) {
