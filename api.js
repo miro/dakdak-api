@@ -156,7 +156,6 @@ module.exports = function(app) {
             return next(new Error(error));
         });
     });
-
     // Update spot
     app.put('/api/v0/spot/:id', function(req, res, next) {
         var attrObj = {
@@ -175,8 +174,26 @@ module.exports = function(app) {
             return next(new Error(error));
         });
     });
+    // Update image
+    app.put('/api/v0/image/:id', function(req, res, next) {
+
+        var attrObj = _.pick(req.body, 
+            'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId'
+        );
+
+        _updateItem('Image', req.params.id, attrObj)
+        .then(function saveOk(model) {
+            _handleResult(model, res, next);
+        })
+        .error(function saveNotOk(error) {
+            return next(new Error(error));
+        });
+    });
 
 
+
+    // # Delete-operations
+    //
     // Delete person
     app.delete('/api/v0/person/:id', function(req, res, next) {
         _deleteItem('Person', req.params.id)
