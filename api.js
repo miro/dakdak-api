@@ -31,11 +31,16 @@ var _generateUUID = (function() {
 })();
 
 var _handleResult = function(result, res, next) {
-    try {
-        res.send(result.toJSON());
+    if (result) {
+        try {
+            res.send(result.toJSON());
+        }
+        catch (error) {
+            return next(new Error(error));
+        }
     }
-    catch (error) {
-        return next(new Error(error));
+    else {
+        res.sendStatus(404);
     }
 };
 
