@@ -1,5 +1,6 @@
 // # Imports
-var aws = require('aws-sdk');
+var aws     = require('aws-sdk');
+var jwt     = require('express-jwt');
 var Promise = require('bluebird');
 var _       = require('lodash');
 
@@ -87,6 +88,10 @@ module.exports = function(app) {
     });
     app.get('/api/v0/spot', function(req, res, next) {
         new db.models.Spot().fetchAll()
+        .then(function(result) { _handleResult(result, res, next); });
+    });
+    app.get('/api/v0/image', function(req, res, next) {
+        new db.models.Image().fetchAll()
         .then(function(result) { _handleResult(result, res, next); });
     });
 
@@ -179,6 +184,16 @@ module.exports = function(app) {
         });
     });
 
+    // Delete image
+    app.delete('/api/v0/image/:id', function(req, res, next) {
+        _deleteItem('Image', req.params.id)
+        .then(function deleteOk() {
+            res.sendStatus(200);
+        })
+        .error(function deleteNotOk(error) {
+            return next(new Error(error));
+        });
+    });
 
 
 
