@@ -77,6 +77,7 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
         return bookshelf.knex.schema.createTable('images', function(t) {
             t.increments('id').primary();
             t.string('s3id', 50);
+            t.string('trickName', 350);
             t.text('description');
             t.date('date');
             t.string('themeColor', 10);
