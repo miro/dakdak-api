@@ -178,7 +178,7 @@ module.exports = function(app) {
     app.put('/api/v0/image/:id', function(req, res, next) {
 
         var attrObj = _.pick(req.body, 
-            'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId'
+            'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published'
         );
 
         _updateItem('Image', req.params.id, attrObj)
