@@ -17,16 +17,16 @@
   },
   "homepage": "https://github.com/miro/dakdak-backend",
   "dependencies": {
-    "knex": "~0.7.6",
-    "bookshelf": "~0.7.9",
-    "pg": "~4.1.1",
-    "express": "~4.10.8",
-    "body-parser": "~1.10.2",
-    "bluebird": "~2.3.11",
     "bcrypt": "~0.8.3",
-    "aws-sdk": "~2.1.31",
+    "bluebird": "~2.3.11",
+    "body-parser": "~1.10.2",
+    "bookshelf": "~0.7.9",
+    "express": "~4.10.8",
     "express-jwt": "~0.5.1",
+    "gcloud": "^0.26.1",
+    "knex": "~0.7.6",
     "lodash": "~3.3.1",
-    "multer": "~0.1.8"
+    "multer": "~0.1.8",
+    "pg": "~4.1.1"
   }
 }

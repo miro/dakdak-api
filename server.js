@@ -24,11 +24,7 @@ app.use(bodyParser.json()); // parse json
 app.use(multer()); // handle multiplart data
 
 
-// # S3 setup
-
-
 // #### Routes
-//
 
 // API
 require('./api')(app);
@@ -42,8 +38,7 @@ app.get('*', function(req, res, next) {
 
 
 
-
-// ## Error handlers
+// ### Error handlers
 app.use(function handle404(err, req, res, next) { // 404
     if (err.status !== 404) return next(err);
     res.send(err.message || '404 Content not found - but such are the mysteries of the Internet sometimes');
