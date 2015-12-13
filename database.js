@@ -76,12 +76,21 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
     if (!exists) {
         return bookshelf.knex.schema.createTable('images', function(t) {
             t.increments('id').primary();
-            t.string('s3id', 50);
+            t.string('storageId', 60).unique(); // identifier for fetching this image on the storage solution (S3/GCS/etc)
+            t.string('title', 140);
             t.string('trickName', 350);
             t.text('description');
             t.date('date');
-            t.string('themeColor', 10);
+            t.string('primaryColor', 10);
+
             t.boolean('published').defaultTo(false);
+            t.boolean('hasThumbnailSize').defaultTo(false);
+            t.boolean('hasDisplaySize').defaultTo(false);
+
+            t.integer('uploaderId')
+                .unsigned()
+                .references('id').inTable('persons')
+                .onDelete('SET NULL');
 
             t.integer('riderId')
                 .unsigned()
