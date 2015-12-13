@@ -3,12 +3,13 @@ var jwt     = require('express-jwt');
 var Promise = require('bluebird');
 var _       = require('lodash');
 
-var config = require('./configurator.js');
-var db = require('./database.js');
 
 
+var config = require('./configurator');
+var db = require('./database');
 module.exports = function(app) {
     // # Basic bulk fetches
+    //
     app.get('/api/v0/person', function(req, res, next) {
         new db.models.Person().fetchAll()
         .then(function(result) { _handleResult(result, res, next); });
@@ -33,7 +34,8 @@ module.exports = function(app) {
         .then(function(result) { _handleResult(result, res, next); });
     });
 
-
+    // # Create-operations
+    //
     // Create person
     app.post('/api/v0/person', function(req, res, next) {
         var person = new db.models.Person({
@@ -66,6 +68,8 @@ module.exports = function(app) {
 
 
 
+    // # Update-operations
+    //
     // Update person
     app.put('/api/v0/person/:id', function(req, res, next) {
         console.log(req.body);
@@ -155,7 +159,7 @@ module.exports = function(app) {
         console.log(req.body);
         console.log(req.params);
 
-        _handleResult({body: req.body, params: req.params}, res, next);
+        _handleResult({ body: req.body, params: req.params }, res, next);
     });
 }
 
@@ -172,19 +176,23 @@ var _generateUUID = (function() {
     };
 })();
 
-var _handleResult = function(result, res, next) {
+
+var _handleResult = function _handleResult(result, res, next) {
+
     if (result) {
         try {
             res.send(result);
         }
         catch (error) {
+            console.error('Error catched on handleResult');
             return next(new Error(error));
         }
     }
     else {
         res.sendStatus(404);
     }
-};
+}
+
 
 var _deleteItem = function(type, id) {
     return new Promise(function(resolve, reject) {
