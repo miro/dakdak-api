@@ -1,6 +1,6 @@
 {
   "name": "dakdak-backend",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Backend for the Dakdak service",
   "main": "server.js",
   "scripts": {
@@ -26,7 +26,8 @@
     "gcloud": "^0.26.1",
     "knex": "~0.7.6",
     "lodash": "~3.3.1",
-    "pg": "~4.1.1"
     "multer": "1.1.0",
+    "pg": "~4.1.1",
+    "streamifier": "^0.1.1"
   }
 }
