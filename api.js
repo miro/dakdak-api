@@ -9,24 +9,32 @@ var storage = multer.memoryStorage()
 var upload = multer({ storage: storage })
 
 
-var config = require('./configurator');
-var db = require('./database');
-var gcs = require('./googleCloud')
+var config      = require('./configurator');
+var db          = require('./database');
+var gcs         = require('./googleCloud');
+
+// Import controller utils functions & shortcut them
+var utils       = require('./utils');
+var handleResult = utils.handleResult;
+var updateItem = utils.updateItem;
+var deleteItem = utils.deleteItem;
+var generateUUID = utils.generateUUID;
+
 
 module.exports = function(app) {
     // # Basic bulk fetches
     //
     app.get('/api/v0/person', function(req, res, next) {
         new db.models.Person().fetchAll()
-        .then(function(result) { _handleResult(result, res, next); });
+        .then(function(result) { handleResult(result, res, next); });
     });
     app.get('/api/v0/spot', function(req, res, next) {
         new db.models.Spot().fetchAll()
-        .then(function(result) { _handleResult(result, res, next); });
+        .then(function(result) { handleResult(result, res, next); });
     });
     app.get('/api/v0/image', function(req, res, next) {
         new db.models.Image().fetchAll()
-        .then(function(result) { _handleResult(result, res, next); });
+        .then(function(result) { handleResult(result, res, next); });
     });
 
 
@@ -37,7 +45,7 @@ module.exports = function(app) {
         new db.models.Image()
         .where({ id: req.params.id })
         .fetch()
-        .then(function(result) { _handleResult(result, res, next); });
+        .then(function(result) { handleResult(result, res, next); });
     });
 
     // # Create-operations
@@ -50,7 +58,7 @@ module.exports = function(app) {
         });
         person.save()
         .then(function saveOk(newPerson) {
-            _handleResult(newPerson, res, next);
+            handleResult(newPerson, res, next);
         });
     });
     // Create spot
@@ -60,7 +68,7 @@ module.exports = function(app) {
         });
         spot.save()
         .then(function saveOk(newSpot) {
-            _handleResult(newSpot, res, next);
+            handleResult(newSpot, res, next);
         });
     });
     // Create image
@@ -71,8 +79,10 @@ module.exports = function(app) {
 
         // });
 
-        _handleResult({ lolz: true }, res, next);
-        gcs.uploadImage('pic-' + _generateUUID(), req.file);
+        console.log(req.file);
+
+        handleResult({ lolz: true }, res, next);
+        gcs.uploadImage('pic-' + generateUUID(), req.file);
     });
 
 
@@ -80,11 +90,9 @@ module.exports = function(app) {
     //
     // Update person
     app.put('/api/v0/person/:id', function(req, res, next) {
-        console.log(req.body);
-
-        _updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
+        updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
         .then(function saveOk(model) {
-            _handleResult(model, res, next);
+            handleResult(model, res, next);
         })
         .error(function saveNotOk(error) {
             return next(new Error(error));
@@ -100,9 +108,9 @@ module.exports = function(app) {
         };
         console.log(attrObj);
 
-        _updateItem('Spot', req.params.id, attrObj)
+        updateItem('Spot', req.params.id, attrObj)
         .then(function saveOk(model) {
-            _handleResult(model, res, next);
+            handleResult(model, res, next);
         })
         .error(function saveNotOk(error) {
             return next(new Error(error));
@@ -115,9 +123,9 @@ module.exports = function(app) {
             'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published'
         );
 
-        _updateItem('Image', req.params.id, attrObj)
+        updateItem('Image', req.params.id, attrObj)
         .then(function saveOk(model) {
-            _handleResult(model, res, next);
+            handleResult(model, res, next);
         })
         .error(function saveNotOk(error) {
             return next(new Error(error));
@@ -130,7 +138,7 @@ module.exports = function(app) {
     //
     // Delete person
     app.delete('/api/v0/person/:id', function(req, res, next) {
-        _deleteItem('Person', req.params.id)
+        deleteItem('Person', req.params.id)
         .then(function deleteOk() {
             res.sendStatus(200);
         })
@@ -141,7 +149,7 @@ module.exports = function(app) {
 
     // Delete spot
     app.delete('/api/v0/spot/:id', function(req, res, next) {
-        _deleteItem('Spot', req.params.id)
+        deleteItem('Spot', req.params.id)
         .then(function deleteOk() {
             res.sendStatus(200);
         })
@@ -152,7 +160,7 @@ module.exports = function(app) {
 
     // Delete image
     app.delete('/api/v0/image/:id', function(req, res, next) {
-        _deleteItem('Image', req.params.id)
+        deleteItem('Image', req.params.id)
         .then(function deleteOk() {
             res.sendStatus(200);
         })
@@ -167,77 +175,9 @@ module.exports = function(app) {
         console.log(req.body);
         console.log(req.params);
 
-        _handleResult({ body: req.body, params: req.params }, res, next);
+        handleResult({ body: req.body, params: req.params }, res, next);
     });
 }
 
 // ### Utility functions
-var _generateUUID = (function() {
-    // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-       .toString(16)
-       .substring(1);
-    }
-    return function() {
-        return s4() + s4() + s4() + s4();
-    };
-})();
 
-
-var _handleResult = function _handleResult(result, res, next) {
-
-    if (result) {
-        try {
-            res.send(result);
-        }
-        catch (error) {
-            console.error('Error catched on handleResult');
-            return next(new Error(error));
-        }
-    }
-    else {
-        res.sendStatus(404);
-    }
-}
-
-
-var _deleteItem = function(type, id) {
-    return new Promise(function(resolve, reject) {
-
-        new db.models[type]({ id: id })
-        .fetch({ require: true })
-        .then(function(model) {
-            if (model) {
-                model.destroy()
-                .then(function destroyOk() {
-                    resolve();
-                });
-            }
-            else {
-                reject('Model not found');
-            }
-        })
-        .catch(function(error) {
-            console.log('Catch on _deleteItem Pokemon block', error);
-            reject(error);
-        });
-    });
-};
-
-
-var _updateItem = function(type, id, newAttrs, res, next) {
-    return new Promise(function(resolve, reject) {
-        new db.models[type]({ id: id })
-        .fetch({ require: true })
-        .then(function (model) {
-            model.save(newAttrs, { patch: true })
-            .then(function saveOk(newModel) {
-                resolve(newModel);
-            })
-            .error(function saveNotOk(error) {
-                reject(error);
-            });
-        });
-    });
-};
