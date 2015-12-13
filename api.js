@@ -12,6 +12,7 @@ var upload = multer({ storage: storage })
 var config      = require('./configurator');
 var db          = require('./database');
 var gcs         = require('./googleCloud');
+var log         = require('./log');
 
 // Import controller utils functions & shortcut them
 var utils       = require('./utils');
@@ -73,16 +74,37 @@ module.exports = function(app) {
     });
     // Create image
     app.post('/api/v0/image', upload.single('imageFile'), function(req, res, next) {
-        // new db.models.Image({ s3id: req.body.s3id })
-        // .save()
-        // .then(function saveOk(newImg) {
+        var file = req.file;
 
-        // });
+        if (file.mimetype !== 'image/jpeg') {
+            log.info('Unsupported filetype detected');
+            throw new Error({ status: 400, message: 'Unsupported file type uploaded' });
+        }
+        var fileStorageId = generateUUID();
 
-        console.log(req.file);
+        // create row into DB        
+        var dbSave = new db.models.Image({ 
+            storageId: fileStorageId
+            // TODO: uploaderId
+        })
+        .save();
 
-        handleResult({ lolz: true }, res, next);
-        gcs.uploadImage('pic-' + generateUUID(), req.file);
+        // upload file into storage
+        var storageUpload = gcs.uploadImage(fileStorageId, req.file);
+
+
+        Promise.props({
+            storage: storageUpload,
+            db: dbSave
+        })
+        .then(function(result) {
+            var newModel = result.db.attributes;
+            handleResult(newModel, res, next);
+        })
+        .catch(function(error) {
+            log.error('Error on image creation', error);
+            throw new Error(error);
+        });
     });
 
 
