@@ -5,8 +5,9 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 
 var app = express();
-var config = require('./configurator.js');
-var api = require('./api.js');
+var config =        require('./configurator');
+var api =           require('./api');
+var log =           require('./log');
 
 
 // ### Config
@@ -43,17 +44,17 @@ app.use(function handle404(err, req, res, next) { // 404
 });
 
 app.use(function genericErrorHandler(err, req, res, next) { // 500
+    // TODO the err.status is always unset, this needs a custom error implementation
     if (_.isUndefined(err.status)) {
         err.status = 500;
     }
 
-    console.log(err); // log the error
-
+    log.error(err); // log the error
     res.status(err.status).send(err); // send response
 });
 
 
 // # Start the server
 app.listen(5000, function() {
-    console.log('Dakdak backend started at port 5000');
+    log.info('Dakdak backend started at port 5000');
 });

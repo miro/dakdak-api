@@ -1,5 +1,4 @@
 var Promise 		= require('bluebird');
-
 var db 				= require('./database');
 
 var utils = {};
