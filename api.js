@@ -2,11 +2,17 @@
 var jwt     = require('express-jwt');
 var Promise = require('bluebird');
 var _       = require('lodash');
+var multer  = require('multer');
 
+// multer init
+var storage = multer.memoryStorage()
+var upload = multer({ storage: storage })
 
 
 var config = require('./configurator');
 var db = require('./database');
+var gcs = require('./googleCloud')
+
 module.exports = function(app) {
     // # Basic bulk fetches
     //
@@ -58,14 +64,16 @@ module.exports = function(app) {
         });
     });
     // Create image
-    app.post('/api/v0/image', function(req, res, next) {
-        new db.models.Image({ s3id: req.body.s3id })
-        .save()
-        .then(function saveOk(newImg) {
-            _handleResult(newImg, res, next);
-        });
-    });
+    app.post('/api/v0/image', upload.single('imageFile'), function(req, res, next) {
+        // new db.models.Image({ s3id: req.body.s3id })
+        // .save()
+        // .then(function saveOk(newImg) {
 
+        // });
+
+        _handleResult({ lolz: true }, res, next);
+        gcs.uploadImage('pic-' + _generateUUID(), req.file);
+    });
 
 
     // # Update-operations

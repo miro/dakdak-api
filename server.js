@@ -1,6 +1,5 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var multer  = require('multer');
 
 var Promise = require('bluebird');
 var _ = require('lodash');
@@ -21,7 +20,6 @@ app.use(function allowCrossDomain(req, res, next) {
 });
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
-app.use(multer()); // handle multiplart data
 
 
 // #### Routes
