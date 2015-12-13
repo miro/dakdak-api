@@ -4,7 +4,7 @@ var configFile   = require('./configs/' + env + '.js');
 console.log('Configs fetched with env "' + env + '"');
 
 module.exports = {
-    environment: env,
-    dbConfig: configFile.dbConfig,
-    s3Config: configFile.s3Config
+    environment: 	env,
+    dbConfig: 		configFile.dbConfig,
+    gcs: 		configFile.gcsConfig
 };

@@ -1,4 +1,6 @@
-var dbConfig = {
+var cfg = {};
+
+cfg.dbConfig = {
     client: 'postgresql',
     connection: {
         host: 'localhost',
@@ -10,14 +12,11 @@ var dbConfig = {
     }
 };
 
-var s3Config = {
-    bucket: 'dakdak',
-    key: process.env.DAKDAK_S3_KEY,
-    secret: process.env.DAKDAK_S3_SECRET
+cfg.gcsConfig = {
+    projectId: 'dakdak-1154',
+    bucketName: 'dakdak-dev',
+    baseUrl: 'https://storage.googleapis.com'
 };
 
 
-module.exports = {
-    dbConfig: dbConfig,
-    s3Config: s3Config
-};
+module.exports = cfg;
