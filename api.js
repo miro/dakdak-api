@@ -175,7 +175,7 @@ var _generateUUID = (function() {
 var _handleResult = function(result, res, next) {
     if (result) {
         try {
-            res.send(result.toJSON());
+            res.send(result);
         }
         catch (error) {
             return next(new Error(error));
