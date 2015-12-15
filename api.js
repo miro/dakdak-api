@@ -5,14 +5,13 @@ var _       = require('lodash');
 var multer  = require('multer');
 
 // multer init
-var storage = multer.memoryStorage()
-var upload = multer({ storage: storage })
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
 
 
-var config      = require('./configurator');
-var db          = require('./database');
-var gcs         = require('./googleCloud');
-var log         = require('./log');
+var config              = require('./configurator');
+var db                  = require('./database');
+var log                 = require('./log');
 var imageService        = require('./services/image');
 
 // Import controller utils functions & shortcut them
