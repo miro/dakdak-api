@@ -17,13 +17,13 @@ var service = {};
 // # API
 //
 // uploadImage
-service.uploadImage = function uploadImageAndMakePublic(imageName, imageFile) {
+service.uploadImageBuffer = function uploadImageAndMakePublic(imageName, imageBuffer) {
     return new Promise(function(resolve, reject) {
         var file = bucket.file(imageName);
 
         log.info('Starting GCS upload for', imageName);
 
-        streamifier.createReadStream(imageFile.buffer)
+        streamifier.createReadStream(imageBuffer)
         .pipe(file.createWriteStream({
             metadata: { contentType: 'image/jpeg' }
         }))

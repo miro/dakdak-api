@@ -1,4 +1,5 @@
 var Promise         = require('bluebird');
+var gm              = require('gm').subClass({ imageMagick: true });
 
 var log             = require('../log');
 var gcs             = require('./googleCloud');
@@ -14,9 +15,16 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
             return reject({ status: 400, message: 'Unsupported file type uploaded' });
         }
 
-        return resolve(gcs.uploadImage(imageName, imageFile));
+        gm(imageFile.buffer)
+        .resize(100)
+        .toBuffer('JPG', ((error, buffer) => {
+            if (error) {
+                return reject(error);
+            }
+            console.log('jyh', buffer);
+            return resolve(gcs.uploadImageBuffer(imageName + '-small', buffer));
+        }));
     });
-
 };
 
 
