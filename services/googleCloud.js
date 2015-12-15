@@ -1,10 +1,10 @@
 var Promise             = require('bluebird');
 var streamifier         = require('streamifier');
-var cfg                 = require('./configurator');
-var log                 = require('./log');
+var cfg                 = require('../configurator');
+var log                 = require('../log');
 
 var gcloud              = require('gcloud')({
-  keyFilename: './configs/keys/dakdak-8acf328d899f.json',
+  keyFilename: __dirname + '/../configs/keys/dakdak-8acf328d899f.json',
   projectId: cfg.gcs.projectId
 });
 
@@ -19,8 +19,9 @@ var service = {};
 // uploadImage
 service.uploadImage = function uploadImageAndMakePublic(imageName, imageFile) {
     return new Promise(function(resolve, reject) {
-
         var file = bucket.file(imageName);
+
+        log.info('Starting GCS upload for', imageName);
 
         streamifier.createReadStream(imageFile.buffer)
         .pipe(file.createWriteStream({

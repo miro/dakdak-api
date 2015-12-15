@@ -13,6 +13,7 @@ var config      = require('./configurator');
 var db          = require('./database');
 var gcs         = require('./googleCloud');
 var log         = require('./log');
+var imageService        = require('./services/image');
 
 // Import controller utils functions & shortcut them
 var utils       = require('./utils');
@@ -75,35 +76,23 @@ module.exports = function(app) {
     // Create image
     app.post('/api/v0/image', upload.single('imageFile'), function(req, res, next) {
         var file = req.file;
+        var fileStorageId = generateUUID(); // will be used as a filename
 
-        if (file.mimetype !== 'image/jpeg') {
-            log.info('Unsupported filetype detected');
-            throw new Error({ status: 400, message: 'Unsupported file type uploaded' });
-        }
-        var fileStorageId = generateUUID();
-
-        // create row into DB        
-        var dbSave = new db.models.Image({ 
-            storageId: fileStorageId
-            // TODO: uploaderId
+        imageService.uploadImage(fileStorageId, file)
+        .then(result => {
+            new db.models.Image({ 
+                storageId: fileStorageId
+                // TODO: uploaderId
+                // TODO: kuvakoot
+            })
+            .save()
+            .then(dbResult => {
+                handleResult(dbResult.serialize(), res, next);
+            });
         })
-        .save();
-
-        // upload file into storage
-        var storageUpload = gcs.uploadImage(fileStorageId, req.file);
-
-
-        Promise.props({
-            storage: storageUpload,
-            db: dbSave
-        })
-        .then(function(result) {
-            var newModel = result.db.attributes;
-            handleResult(newModel, res, next);
-        })
-        .catch(function(error) {
+        .catch(error => {
             log.error('Error on image creation', error);
-            throw new Error(error);
+            next(error);
         });
     });
 
