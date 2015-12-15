@@ -15,18 +15,34 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
             return reject({ status: 400, message: 'Unsupported file type uploaded' });
         }
 
-        gm(imageFile.buffer)
-        .resize(100)
-        .toBuffer('JPG', ((error, buffer) => {
-            if (error) {
-                return reject(error);
-            }
-            console.log('jyh', buffer);
-            return resolve(gcs.uploadImageBuffer(imageName + '-small', buffer));
-        }));
+        Promise.props({
+            thumb: resizeIntoWidth(imageFile.buffer, 200),
+            displaySize: resizeIntoWidth(imageFile.buffer, 500)
+        })
+        .then(buffers => {
+            Promise.props({
+                original: gcs.uploadImageBuffer(imageName, imageFile.buffer),
+                thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
+                display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize)
+            })
+            .then(uploads => resolve(uploads));
+        });
     });
 };
 
+
+function resizeIntoWidth(imageBuffer, width) {
+    return new Promise((resolve, reject) => {
+        gm(imageBuffer)
+        .resize(width)
+        .toBuffer('JPG', ((error, resultBuffer) => {
+            if (error) {
+                return reject(error);
+            }
+            return resolve(resultBuffer);
+        }));
+    });
+}
 
 
 module.exports = service;
