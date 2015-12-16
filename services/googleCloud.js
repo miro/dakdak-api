@@ -32,14 +32,18 @@ service.uploadImageBuffer = function uploadImageAndMakePublic(imageName, imageBu
             reject(error);
         })
         .on('finish', function() {
-            log.debug('File uploaded succesfully to GCS! Now making it public...');
+            log.debug('File', imageName, 'uploaded succesfully to GCS! Now making it public...');
+
             file.makePublic(function(error, response) {
                 if (error) {
                     log.error('Making file public in GCS failed!');
                     return reject(error);
                 }
-                log.debug('File set to public!');
-                resolve(response);
+                log.debug('File', imageName, 'set to public!');
+                resolve({
+                    imageName,
+                    uploaded: true
+                });
             })
         });
     });

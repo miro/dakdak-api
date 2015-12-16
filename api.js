@@ -78,11 +78,12 @@ module.exports = function(app) {
         var fileStorageId = generateUUID(); // will be used as a filename
 
         imageService.uploadImage(fileStorageId, file)
-        .then(result => {
+        .then(uploadResult => {
             new db.models.Image({ 
-                storageId: fileStorageId
+                storageId: fileStorageId,
                 // TODO: uploaderId
-                // TODO: kuvakoot
+                hasThumbnailSize: uploadResult.thumb.uploaded,
+                hasDisplaySize: uploadResult.display.uploaded
             })
             .save()
             .then(dbResult => {
