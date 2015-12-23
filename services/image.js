@@ -16,8 +16,8 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
         }
 
         Promise.props({
-            thumb: resizeIntoWidth(imageFile.buffer, 200),
-            displaySize: resizeIntoWidth(imageFile.buffer, 500)
+            thumb: resizeIntoWidth(imageFile.buffer, 320),
+            displaySize: resizeIntoWidth(imageFile.buffer, 640)
         })
         .then(buffers => {
             Promise.props({
