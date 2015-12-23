@@ -25,15 +25,15 @@ var generateUUID = utils.generateUUID;
 module.exports = function(app) {
     // # Basic bulk fetches
     //
-    app.get('/api/v0/person', function(req, res, next) {
+    app.get('/api/v0/persons', function(req, res, next) {
         new db.models.Person().fetchAll()
         .then(function(result) { handleResult(result, res, next); });
     });
-    app.get('/api/v0/spot', function(req, res, next) {
+    app.get('/api/vs0/spots', function(req, res, next) {
         new db.models.Spot().fetchAll()
         .then(function(result) { handleResult(result, res, next); });
     });
-    app.get('/api/v0/image', function(req, res, next) {
+    app.get('/api/v0/images', function(req, res, next) {
         new db.models.Image().fetchAll()
         .then(function(result) { handleResult(result, res, next); });
     });
@@ -42,7 +42,7 @@ module.exports = function(app) {
     // # Get single entity
     //
     // Image
-    app.get('/api/v0/image/:id', function(req, res, next) {
+    app.get('/api/v0/images/:id', function(req, res, next) {
         new db.models.Image()
         .where({ id: req.params.id })
         .fetch()
@@ -52,7 +52,7 @@ module.exports = function(app) {
     // # Create-operations
     //
     // Create person
-    app.post('/api/v0/person', function(req, res, next) {
+    app.post('/api/v0/persons', function(req, res, next) {
         var person = new db.models.Person({
             fullName: req.body.fullName,
             displayName: req.body.displayName
@@ -63,7 +63,7 @@ module.exports = function(app) {
         });
     });
     // Create spot
-    app.post('/api/v0/spot', function(req, res, next) {
+    app.post('/api/vs0/spots', function(req, res, next) {
         var spot = new db.models.Spot({
             name: req.body.name
         });
@@ -73,7 +73,7 @@ module.exports = function(app) {
         });
     });
     // Create image
-    app.post('/api/v0/image', upload.single('imageFile'), function(req, res, next) {
+    app.post('/api/v0/images', upload.single('imageFile'), function(req, res, next) {
         var file = req.file;
         var fileStorageId = generateUUID(); // will be used as a filename
 
@@ -100,7 +100,7 @@ module.exports = function(app) {
     // # Update-operations
     //
     // Update person
-    app.put('/api/v0/person/:id', function(req, res, next) {
+    app.put('/api/v0/persons/:id', function(req, res, next) {
         updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
         .then(function saveOk(model) {
             handleResult(model, res, next);
@@ -110,7 +110,7 @@ module.exports = function(app) {
         });
     });
     // Update spot
-    app.put('/api/v0/spot/:id', function(req, res, next) {
+    app.put('/api/v0/spots/:id', function(req, res, next) {
         var attrObj = {
             name: req.body.name,
             location_search_string: req.body.location_search_string,
@@ -128,7 +128,7 @@ module.exports = function(app) {
         });
     });
     // Update image
-    app.put('/api/v0/image/:id', function(req, res, next) {
+    app.put('/api/v0/images/:id', function(req, res, next) {
 
         var attrObj = _.pick(req.body, 
             'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published'
@@ -148,7 +148,7 @@ module.exports = function(app) {
     // # Delete-operations
     //
     // Delete person
-    app.delete('/api/v0/person/:id', function(req, res, next) {
+    app.delete('/api/v0/persons/:id', function(req, res, next) {
         deleteItem('Person', req.params.id)
         .then(function deleteOk() {
             res.sendStatus(200);
@@ -159,7 +159,7 @@ module.exports = function(app) {
     });
 
     // Delete spot
-    app.delete('/api/v0/spot/:id', function(req, res, next) {
+    app.delete('/api/v0/spots/:id', function(req, res, next) {
         deleteItem('Spot', req.params.id)
         .then(function deleteOk() {
             res.sendStatus(200);
@@ -170,7 +170,7 @@ module.exports = function(app) {
     });
 
     // Delete image
-    app.delete('/api/v0/image/:id', function(req, res, next) {
+    app.delete('/api/v0/images/:id', function(req, res, next) {
         deleteItem('Image', req.params.id)
         .then(function deleteOk() {
             res.sendStatus(200);
@@ -189,6 +189,3 @@ module.exports = function(app) {
         handleResult({ body: req.body, params: req.params }, res, next);
     });
 }
-
-// ### Utility functions
-
