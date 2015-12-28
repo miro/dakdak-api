@@ -29,7 +29,7 @@ module.exports = function(app) {
         new db.models.Person().fetchAll()
         .then(function(result) { handleResult(result, res, next); });
     });
-    app.get('/api/vs0/spots', function(req, res, next) {
+    app.get('/api/v0/spots', function(req, res, next) {
         new db.models.Spot().fetchAll()
         .then(function(result) { handleResult(result, res, next); });
     });
@@ -63,7 +63,7 @@ module.exports = function(app) {
         });
     });
     // Create spot
-    app.post('/api/vs0/spots', function(req, res, next) {
+    app.post('/api/v0/spots', function(req, res, next) {
         var spot = new db.models.Spot({
             name: req.body.name
         });
