@@ -4,6 +4,9 @@ var log             = require('./log');
 
 var utils = {};
 
+// TODO: convert this into some databaseService or something like that...
+
+
 utils.generateUUID = (function() {
     // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     function s4() {

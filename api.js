@@ -15,11 +15,11 @@ var log                 = require('./log');
 var imageService        = require('./services/image');
 
 // Import controller utils functions & shortcut them
-var utils       = require('./utils');
-var handleResult = utils.handleResult;
-var updateItem = utils.updateItem;
-var deleteItem = utils.deleteItem;
-var generateUUID = utils.generateUUID;
+var utils               = require('./utils');
+var handleResult        = utils.handleResult;
+var updateItem          = utils.updateItem;
+var deleteItem          = utils.deleteItem;
+var generateUUID        = utils.generateUUID;
 
 
 module.exports = function(app) {
