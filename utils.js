@@ -1,5 +1,6 @@
 var Promise 		= require('bluebird');
 var db 				= require('./database');
+var log             = require('./log');
 
 var utils = {};
 
@@ -22,8 +23,8 @@ utils.handleResult = function _handleResult(result, res, next) {
             res.send(result);
         }
         catch (error) {
-            console.error('Error catched on handleResult');
-            return next(new Error(error));
+            log.error('Error catched on handleResult');
+            next(error);
         }
     }
     else {
@@ -49,7 +50,7 @@ utils.deleteItem = function(type, id) {
             }
         })
         .catch(function(error) {
-            console.log('Catch on _deleteItem Pokemon block', error);
+            log.debug('Catch on _deleteItem Pokemon block', error);
             reject(error);
         });
     });
