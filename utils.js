@@ -69,6 +69,9 @@ utils.updateItem = function(type, id, newAttrs, res, next) {
             .error(function saveNotOk(error) {
                 reject(error);
             });
+        })
+        .catch(function(error) {
+            reject(error);
         });
     });
 };
