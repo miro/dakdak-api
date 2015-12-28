@@ -4,7 +4,7 @@ var cfg                 = require('../configurator');
 var log                 = require('../log');
 
 var gcloud              = require('gcloud')({
-  keyFilename: __dirname + '/../configs/keys/dakdak-8acf328d899f.json',
+  keyFilename: __dirname + '/../configs/keys/dakdak-gcs-storage-key.json',
   projectId: cfg.gcs.projectId
 });
 
