@@ -79,11 +79,15 @@ module.exports = function(app) {
 
         imageService.uploadImage(fileStorageId, file)
         .then(uploadResult => {
-            new db.models.Image({ 
+            new db.models.Image({
                 storageId: fileStorageId,
                 // TODO: uploaderId
+                // TODO: uploadDate?
                 hasThumbnailSize: uploadResult.thumb.uploaded,
-                hasDisplaySize: uploadResult.display.uploaded
+                hasDisplaySize: uploadResult.display.uploaded,
+
+                year: req.body.year,
+                month: req.body.month,
             })
             .save()
             .then(dbResult => {
