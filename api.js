@@ -113,7 +113,6 @@ module.exports = function(app) {
     app.put('/api/v0/spots/:id', function(req, res, next) {
         var attrObj = {
             name: req.body.name,
-            location_search_string: req.body.location_search_string,
             latitude: parseFloat(req.body.latitude) || 0.0,
             longitude: parseFloat(req.body.longitude) ||  0.0
         };

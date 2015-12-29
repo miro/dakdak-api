@@ -44,7 +44,6 @@ bookshelf.knex.schema.hasTable('spots').then(function(exists) {
         return bookshelf.knex.schema.createTable('spots', function(t) {
             t.increments('id').primary();
             t.string('name', 50);
-            t.string('location_search_string', 100);
             t.float('latitude');
             t.float('longitude');
         });
