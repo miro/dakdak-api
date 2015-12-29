@@ -44,6 +44,7 @@ bookshelf.knex.schema.hasTable('spots').then(function(exists) {
         return bookshelf.knex.schema.createTable('spots', function(t) {
             t.increments('id').primary();
             t.string('name', 50);
+            t.text('description');
             t.float('latitude');
             t.float('longitude');
         });
@@ -89,6 +90,7 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
             t.boolean('published').defaultTo(false);
             t.boolean('hasThumbnailSize').defaultTo(false);
             t.boolean('hasDisplaySize').defaultTo(false);
+            // TODO: uploadDate?
 
             t.integer('uploaderId')
                 .unsigned()

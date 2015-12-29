@@ -117,10 +117,10 @@ module.exports = function(app) {
     app.put('/api/v0/spots/:id', function(req, res, next) {
         var attrObj = {
             name: req.body.name,
+            description: req.body.description,
             latitude: parseFloat(req.body.latitude) || 0.0,
             longitude: parseFloat(req.body.longitude) ||  0.0
         };
-        console.log(attrObj);
 
         updateItem('Spot', req.params.id, attrObj)
         .then(function saveOk(model) {
