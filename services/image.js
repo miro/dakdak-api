@@ -16,8 +16,8 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
         }
 
         Promise.props({
-            thumb: resizeIntoWidth(imageFile.buffer, 320),
-            displaySize: resizeIntoWidth(imageFile.buffer, 640)
+            thumb: _resizeIntoWidth(imageFile.buffer, 320),
+            displaySize: _resizeIntoWidth(imageFile.buffer, 640)
         })
         .then(buffers => {
             Promise.props({
@@ -31,7 +31,7 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
 };
 
 
-function resizeIntoWidth(imageBuffer, width) {
+function _resizeIntoWidth(imageBuffer, width) {
     return new Promise((resolve, reject) => {
         gm(imageBuffer)
         .resize(width)
@@ -43,6 +43,5 @@ function resizeIntoWidth(imageBuffer, width) {
         }));
     });
 }
-
 
 module.exports = service;
