@@ -27,6 +27,8 @@ app.use(bodyParser.json()); // parse json
 
 app.use(passport.initialize());
 
+app.set('view engine', 'jade');
+
 
 // #### Routes
 
