@@ -1,13 +1,15 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+var express         = require('express');
+var bodyParser      = require('body-parser');
+var Promise         = require('bluebird');
+var _               = require('lodash');
 
-var Promise = require('bluebird');
-var _ = require('lodash');
+var config          = require('./configurator');
+var api             = require('./api');
+var log             = require('./log');
+var authService     = require('./services/auth');
 
-var app = express();
-var config =        require('./configurator');
-var api =           require('./api');
-var log =           require('./log');
+var app             = express();
+
 
 
 // ### Config
