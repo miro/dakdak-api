@@ -59,8 +59,10 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
             t.increments('id').primary();
             t.string('email', 100);
             t.string('displayName', 50);
-            t.string('password', 60);
             t.integer('accessLevel').defaultTo(0);
+
+            t.string('provider', 150); // who has authorized this user? Facebook, Google, ..., ?
+            t.string('providerId', 150); // what is the ID on the provider's system for this user?
 
             t.integer('personId')
                 .unsigned()
@@ -77,7 +79,7 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
         return bookshelf.knex.schema.createTable('images', function(t) {
             t.increments('id').primary();
             t.string('storageId', 60).unique(); // identifier for fetching this image on the storage solution (S3/GCS/etc)
-            
+
             t.string('title', 140);
             t.string('trickName', 350);
             t.text('description');
