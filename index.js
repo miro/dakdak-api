@@ -2,6 +2,7 @@ var express         = require('express');
 var bodyParser      = require('body-parser');
 var Promise         = require('bluebird');
 var _               = require('lodash');
+var passport        = require('passport');
 
 var config          = require('./configurator');
 var api             = require('./api');
@@ -24,8 +25,22 @@ app.use(function allowCrossDomain(req, res, next) {
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
 
+app.use(passport.initialize());
+
 
 // #### Routes
+
+// Auth related
+app.get('/auth/facebook', passport.authenticate('facebook'));
+
+app.get('/auth/facebook/callback',
+    passport.authenticate('facebook'),
+    function(req, res) {
+        console.log('auth ok!');
+
+        res.render('auth-callback', { user: req.user.id, message: 'Hello there!'});
+    }
+);
 
 // API
 require('./api')(app);
