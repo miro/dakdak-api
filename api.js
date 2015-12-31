@@ -4,21 +4,20 @@ var Promise = require('bluebird');
 var _       = require('lodash');
 var multer  = require('multer');
 
-// multer init
-var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });
-
-
 var config              = require('./configurator');
 var db                  = require('./database');
 var log                 = require('./log');
 var imageService        = require('./services/image');
-
-// Import controller utils functions & shortcut them
+var modelController     = require('./controllers/model');
 var utils               = require('./utils');
+
+
+// multer init
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
+
+// Shortcuts for utils functions
 var handleResult        = utils.handleResult;
-var updateItem          = utils.updateItem;
-var deleteItem          = utils.deleteItem;
 var generateUUID        = utils.generateUUID;
 
 
@@ -26,16 +25,16 @@ module.exports = function(app) {
     // # Basic bulk fetches
     //
     app.get('/api/v0/persons', function(req, res, next) {
-        new db.models.Person().fetchAll()
-        .then(function(result) { handleResult(result, res, next); });
+        modelController.getAll('Person')
+        .then(result => handleResult(result, res, next));
     });
     app.get('/api/v0/spots', function(req, res, next) {
-        new db.models.Spot().fetchAll()
-        .then(function(result) { handleResult(result, res, next); });
+        modelController.getAll('Spot')
+        .then(result => handleResult(result, res, next));
     });
     app.get('/api/v0/images', function(req, res, next) {
-        new db.models.Image().fetchAll()
-        .then(function(result) { handleResult(result, res, next); });
+        modelController.getAll('Image')
+        .then(result => handleResult(result, res, next));
     });
 
 
@@ -43,43 +42,44 @@ module.exports = function(app) {
     //
     // Image
     app.get('/api/v0/images/:id', function(req, res, next) {
-        new db.models.Image()
-        .where({ id: req.params.id })
-        .fetch()
-        .then(function(result) { handleResult(result, res, next); });
+        modelController.getSingle('Image', { id: req.params.id })
+        .then(result => handleResult(result, res, next));
     });
+
+
 
     // # Create-operations
     //
+
     // Create person
     app.post('/api/v0/persons', function(req, res, next) {
-        var person = new db.models.Person({
+        modelController.create('Person', {
             fullName: req.body.fullName,
             displayName: req.body.displayName
-        });
-        person.save()
+        })
         .then(function saveOk(newPerson) {
             handleResult(newPerson, res, next);
         });
     });
+
     // Create spot
     app.post('/api/v0/spots', function(req, res, next) {
-        var spot = new db.models.Spot({
+        modelController.create('Spot', {
             name: req.body.name
-        });
-        spot.save()
+        })
         .then(function saveOk(newSpot) {
             handleResult(newSpot, res, next);
         });
     });
-    // Create image
+
+    // Create (upload) image
     app.post('/api/v0/images', upload.single('imageFile'), function(req, res, next) {
         var file = req.file;
         var fileStorageId = generateUUID(); // will be used as a filename
 
         imageService.uploadImage(fileStorageId, file)
         .then(uploadResult => {
-            new db.models.Image({
+            modelController.create('Image', {
                 storageId: fileStorageId,
                 // TODO: uploaderId
                 // TODO: uploadDate?
@@ -89,7 +89,6 @@ module.exports = function(app) {
                 year: req.body.year,
                 month: req.body.month,
             })
-            .save()
             .then(dbResult => {
                 handleResult(dbResult.serialize(), res, next);
             });
@@ -103,48 +102,36 @@ module.exports = function(app) {
 
     // # Update-operations
     //
+
     // Update person
     app.put('/api/v0/persons/:id', function(req, res, next) {
-        updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
-        .then(function saveOk(model) {
-            handleResult(model, res, next);
-        })
-        .error(function saveNotOk(error) {
-            return next(new Error(error));
-        });
+        modelController.update('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
+        .then(newProps => handleResult(newProps, res, next))
+        .error(error => next(new Error(error)));
     });
+
     // Update spot
     app.put('/api/v0/spots/:id', function(req, res, next) {
-        var attrObj = {
+        modelController.update('Spot', req.params.id, {
             name: req.body.name,
             description: req.body.description,
             latitude: parseFloat(req.body.latitude) || 0.0,
             longitude: parseFloat(req.body.longitude) ||  0.0
-        };
-
-        updateItem('Spot', req.params.id, attrObj)
-        .then(function saveOk(model) {
-            handleResult(model, res, next);
         })
-        .error(function saveNotOk(error) {
-            return next(new Error(error));
-        });
+        .then(newProps => handleResult(newProps, res, next))
+        .error(error => next(new Error(error)));
     });
+
     // Update image
     app.put('/api/v0/images/:id', function(req, res, next) {
-
-        var attrObj = _.pick(req.body, 
+        var props = _.pick(req.body,
             'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
             'year', 'month', 'day'
         );
 
-        updateItem('Image', req.params.id, attrObj)
-        .then(function saveOk(model) {
-            handleResult(model, res, next);
-        })
-        .error(function saveNotOk(error) {
-            return next(new Error(error));
-        });
+        modelController.update('Image', req.params.id, props)
+        .then(newProps => handleResult(newProps, res, next))
+        .error(error => next(new Error(error)));
     });
 
 
@@ -153,35 +140,23 @@ module.exports = function(app) {
     //
     // Delete person
     app.delete('/api/v0/persons/:id', function(req, res, next) {
-        deleteItem('Person', req.params.id)
-        .then(function deleteOk() {
-            res.sendStatus(200);
-        })
-        .error(function deleteNotOk(error) {
-            return next(new Error(error));
-        });
+        modelController.delete('Person', req.params.id)
+        .then(() => res.sendStatus(200))
+        .error(error => next(new Error(error)));
     });
 
     // Delete spot
     app.delete('/api/v0/spots/:id', function(req, res, next) {
-        deleteItem('Spot', req.params.id)
-        .then(function deleteOk() {
-            res.sendStatus(200);
-        })
-        .error(function deleteNotOk(error) {
-            return next(new Error(error));
-        });
+        modelController.delete('Spot', req.params.id)
+        .then(() => res.sendStatus(200))
+        .error(error => next(new Error(error)));
     });
 
     // Delete image
     app.delete('/api/v0/images/:id', function(req, res, next) {
-        deleteItem('Image', req.params.id)
-        .then(function deleteOk() {
-            res.sendStatus(200);
-        })
-        .error(function deleteNotOk(error) {
-            return next(new Error(error));
-        });
+        modelController.delete('Image', req.params.id)
+        .then(() => res.sendStatus(200))
+        .error(error => next(new Error(error)));
     });
 
 
@@ -192,4 +167,4 @@ module.exports = function(app) {
 
         handleResult({ body: req.body, params: req.params }, res, next);
     });
-}
+};

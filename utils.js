@@ -4,9 +4,6 @@ var log             = require('./log');
 
 var utils = {};
 
-// TODO: convert this into some databaseService or something like that...
-
-
 utils.generateUUID = (function() {
     // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     function s4() {
@@ -20,7 +17,7 @@ utils.generateUUID = (function() {
 })();
 
 
-utils.handleResult = function _handleResult(result, res, next) {
+utils.handleResult = function handleResult(result, res, next) {
     if (result) {
         try {
             res.send(result);
@@ -35,49 +32,6 @@ utils.handleResult = function _handleResult(result, res, next) {
     }
 }
 
-
-utils.deleteItem = function(type, id) {
-    return new Promise(function(resolve, reject) {
-
-        new db.models[type]({ id: id })
-        .fetch({ require: true })
-        .then(function(model) {
-            if (model) {
-                model.destroy()
-                .then(function destroyOk() {
-                    resolve();
-                });
-            }
-            else {
-                reject('Model not found');
-            }
-        })
-        .catch(function(error) {
-            log.debug('Catch on _deleteItem Pokemon block', error);
-            reject(error);
-        });
-    });
-};
-
-
-utils.updateItem = function(type, id, newAttrs, res, next) {
-    return new Promise(function(resolve, reject) {
-        new db.models[type]({ id: id })
-        .fetch({ require: true })
-        .then(function (model) {
-            model.save(newAttrs, { patch: true })
-            .then(function saveOk(newModel) {
-                resolve(newModel);
-            })
-            .error(function saveNotOk(error) {
-                reject(error);
-            });
-        })
-        .catch(function(error) {
-            reject(error);
-        });
-    });
-};
 
 
 module.exports = utils;

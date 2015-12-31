@@ -1,12 +1,8 @@
-var config = require('./configurator.js');
+var config              = require('./configurator.js');
 
-var Promise = require('bluebird');
-var knex = require('knex')(config.dbConfig);
-var bookshelf = require('bookshelf')(knex);
-var bcrypt = Promise.promisifyAll(require('bcrypt'));
-
-// TODO: rename camelCases to something_case
-
+var Promise             = require('bluebird');
+var knex                = require('knex')(config.dbConfig);
+var bookshelf           = require('bookshelf')(knex);
 
 
 
