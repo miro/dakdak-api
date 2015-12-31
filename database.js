@@ -140,7 +140,8 @@ models.Organisation = bookshelf.Model.extend({
 
 module.exports = {
     bookshelf: bookshelf,
-    models: models
+    models: models,
+    knex: bookshelf.knex
 }
 
 
