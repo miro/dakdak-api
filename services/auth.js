@@ -9,7 +9,8 @@ var log                     = require('../log');
 const facebookCfg = {
     clientID: process.env.DAKDAK_FB_APP_ID,
     clientSecret: process.env.DAKDAK_FB_APP_SECRET,
-    callbackURL: 'http://localhost:5000/auth/facebook/callback' // TODO parameterize
+    callbackURL: 'http://localhost:5000/auth/facebook/callback', // TODO parameterize
+    profileFields: ['id', 'email', 'displayName'] // what fields to fetch from Facebook
 };
 
 // these are required for Passport to work
