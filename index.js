@@ -2,11 +2,15 @@ var express         = require('express');
 var bodyParser      = require('body-parser');
 var Promise         = require('bluebird');
 var _               = require('lodash');
+var passport        = require('passport');
+var jwt             = require('express-jwt');
+
 
 var config          = require('./configurator');
 var api             = require('./api');
 var log             = require('./log');
 var authService     = require('./services/auth');
+var tokenService    = require('./services/token');
 
 var app             = express();
 
@@ -24,8 +28,29 @@ app.use(function allowCrossDomain(req, res, next) {
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse json
 
+app.use(passport.initialize());
+app.use(jwt({ secret: config.jwt.secret }).unless({
+    path: ['/auth/facebook', '/auth/facebook/callback']
+}));
+
+app.set('view engine', 'jade');
+
 
 // #### Routes
+
+// Auth related
+app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['public_profile', 'email'] }));
+
+app.get('/auth/facebook/callback',
+    passport.authenticate('facebook'),
+    function(req, res) {
+        var user = req.user;
+        log.debug('auth ok!', user);
+        var token = tokenService.getToken(user);
+
+        res.render('auth-callback', { token, user });
+    }
+);
 
 // API
 require('./api')(app);
