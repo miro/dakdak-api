@@ -67,7 +67,6 @@ function parsePropsFromProvider(provider, props) {
             }
 
             return parsedProps;
-        break;
 
         default:
             log.error('No idea how to parse props for provider', provider);
@@ -75,4 +74,4 @@ function parsePropsFromProvider(provider, props) {
     }
 }
 
-module.exports = controller
+module.exports = controller;

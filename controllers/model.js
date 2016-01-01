@@ -17,7 +17,8 @@ controller.getAll = function(modelType) {
         new db
         .models[modelType]()
         .fetchAll()
-        .then(items => resolve(items));
+        .then(items => resolve(items))
+        .error(error => reject(error));
     });
 };
 
@@ -43,7 +44,7 @@ controller.create = function(modelType, props) {
 };
 
 
-controller.update = function(modelType, id, newAttrs, res, next) {
+controller.update = function(modelType, id, newAttrs) {
     return new Promise((resolve, reject) => {
 
         new db.models[modelType]({ id })

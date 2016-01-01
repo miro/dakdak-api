@@ -1,12 +1,8 @@
 var config              = require('./configurator.js');
 
-var Promise             = require('bluebird');
 var knex                = require('knex')(config.dbConfig);
 var bookshelf           = require('bookshelf')(knex);
 
-
-
-// # Init the database
 
 // Organisations
 bookshelf.knex.schema.hasTable('organisations').then(function(exists) {

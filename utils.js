@@ -30,8 +30,6 @@ utils.handleResult = function handleResult(result, res, next) {
     else {
         res.sendStatus(404);
     }
-}
-
-
+};
 
 module.exports = utils;
