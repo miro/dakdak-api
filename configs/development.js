@@ -12,10 +12,14 @@ cfg.dbConfig = {
     }
 };
 
-cfg.gcsConfig = {
+cfg.gcs = {
     projectId: 'dakdak-1154',
     bucketName: 'dakdak-dev',
     baseUrl: 'https://storage.googleapis.com'
+};
+
+cfg.jwt = {
+    secret: 'super secret string, you should change this into something else!'
 };
 
 

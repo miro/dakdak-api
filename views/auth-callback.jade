@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
   head
-    title Dakdak Auth Callback
+    title Dakdak Sisäänkirjautuminen
 
     script(type='text/javascript').
 
@@ -11,13 +11,10 @@ html(lang="en")
 
         // Send event back into it, if origin matches
         if (event.origin === 'http://localhost:3000') { // TODO parameterize the URL
-          event.source.postMessage('#{user}', '*');
-          // TODO: close window with some condition
+            event.source.postMessage('#{token}', '*');
+            window.close();
         }
       }, false);
 
   body
-    h1 Auth callback
-    #container.col
-      p= JSON.stringify(user)
-      p= message
+    h1 Sisäänkirjautuminen onnistui!

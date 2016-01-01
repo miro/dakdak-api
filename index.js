@@ -38,9 +38,11 @@ app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['public_pr
 app.get('/auth/facebook/callback',
     passport.authenticate('facebook'),
     function(req, res) {
-        console.log('auth ok!');
+        var user = req.user;
+        log.debug('auth ok!', user);
+        var token = tokenService.getToken(user);
 
-        res.render('auth-callback', { user: req.user.id, message: 'Hello there!'});
+        res.render('auth-callback', { token, user });
     }
 );
 
