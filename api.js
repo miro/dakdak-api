@@ -80,7 +80,7 @@ module.exports = function(app) {
         .then(uploadResult => {
             modelController.create('Image', {
                 storageId: fileStorageId,
-                // TODO: uploaderId
+                uploaderId: req.user.id,
                 // TODO: uploadDate?
                 hasThumbnailSize: uploadResult.thumb.uploaded,
                 hasDisplaySize: uploadResult.display.uploaded,
