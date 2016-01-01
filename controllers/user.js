@@ -12,13 +12,17 @@ let log                 = require('../log');
 let controller = {};
 
 
-controller.getOrCreate = function(provider, providerId)  {
+controller.getOrCreate = function(provider, providerId, props)  {
     return new Promise((resolve, reject) => {
         controller.getUser({ provider, providerId })
         .then(result => {
             if (_.isNull(result)) {
                 log.debug('New user registration!');
-                return resolve(controller.createUser({ provider, providerId }));
+                let userProps = parsePropsFromProvider(provider, props);
+                userProps.provider = provider;
+                userProps.providerId = providerId;
+
+                return resolve(controller.createUser(userProps));
             }
             else {
                 log.debug('Existing user login!');
@@ -39,6 +43,7 @@ controller.getUser = function(whereObject) {
 };
 
 controller.createUser = function(props) {
+    // TODO: match to person automatically if displayName matches?
     return new Promise((resolve, reject) => {
         let model = new db.models.User(props);
         model.save()
@@ -48,5 +53,26 @@ controller.createUser = function(props) {
 };
 
 
+function parsePropsFromProvider(provider, props) {
+    switch(provider) {
+        case 'facebook':
+            let parsedProps = {};
+            parsedProps.displayName = props.displayName;
+
+            // email-attribute from Facebook is an array containing objects, such as:
+            // emails: [ { value: 'derpy.developer@foo.com' } ]
+            // pick the first one from that list
+            if (props.emails && props.emails.length > 0) {
+                parsedProps.email = props.emails[0].value;
+            }
+
+            return parsedProps;
+        break;
+
+        default:
+            log.error('No idea how to parse props for provider', provider);
+            return props;
+    }
+}
 
 module.exports = controller

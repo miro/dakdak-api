@@ -19,8 +19,7 @@ passport.deserializeUser((user, done) => done(null, user));
 
 passport.use(new FacebookStrategy(facebookCfg, (accessToken, refreshToken, profile, done) => {
     log.debug('Auth ok from Facebook! Syncing with our own database...');
-
-    userController.getOrCreate('facebook', profile.id)
+    userController.getOrCreate('facebook', profile.id, profile)
     .then(userModel => {
         log.debug('User created/fetched', userModel.id);
         done(null, userModel);
