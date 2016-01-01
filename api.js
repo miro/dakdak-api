@@ -1,5 +1,4 @@
 // # Imports
-var jwt     = require('express-jwt');
 var Promise = require('bluebird');
 var _       = require('lodash');
 var multer  = require('multer');

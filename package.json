@@ -20,12 +20,11 @@
   },
   "homepage": "https://github.com/miro/dakdak-backend",
   "dependencies": {
-    "bcrypt": "~0.8.3",
     "bluebird": "3.0.6",
     "body-parser": "~1.10.2",
     "bookshelf": "0.9.1",
     "express": "4.13.3",
-    "express-jwt": "~0.5.1",
+    "express-jwt": "3.3.0",
     "gcloud": "^0.26.1",
     "gm": "^1.21.1",
     "jade": "^1.11.0",
