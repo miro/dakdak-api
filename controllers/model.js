@@ -1,6 +1,9 @@
 // # modelController
 //      everything related to models - persons, images, spots
 //
+
+// TODO: auto sort on fetches, now the one which is edited by latest is returned as first
+
 'use strict';
 
 let Promise             = require('bluebird');

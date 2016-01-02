@@ -32,4 +32,10 @@ utils.handleResult = function handleResult(result, res, next) {
     }
 };
 
+utils.solveTitleFromFilename = function(filename) {
+    var nameParts = filename.split('.');
+    nameParts.pop(); // remove extension
+    return nameParts.join('-');
+};
+
 module.exports = utils;

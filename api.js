@@ -74,7 +74,9 @@ module.exports = function(app) {
     // Create (upload) image
     app.post('/api/v0/images', upload.single('imageFile'), function(req, res, next) {
         var file = req.file;
+
         var fileStorageId = generateUUID(); // will be used as a filename
+        var defaultTitle = utils.solveTitleFromFilename(file.originalname);
 
         imageService.uploadImage(fileStorageId, file)
         .then(uploadResult => {
@@ -87,6 +89,7 @@ module.exports = function(app) {
 
                 year: req.body.year,
                 month: req.body.month,
+                title: defaultTitle
             })
             .then(dbResult => {
                 handleResult(dbResult.serialize(), res, next);
