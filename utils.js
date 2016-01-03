@@ -1,6 +1,5 @@
 var Promise 		= require('bluebird');
-var db 				= require('./database');
-var log             = require('./log');
+var _               = require('lodash');
 
 var utils = {};
 
@@ -37,5 +36,18 @@ utils.solveTitleFromFilename = function(filename) {
     nameParts.pop(); // remove extension
     return nameParts.join('-');
 };
+
+utils.setEmptyStringsNull = function(object) {
+    // Set empty strings to null
+    // (since frontend might pass some of the integer fields as string, this allows unsetting those)
+    // fields - otherwise DB barfs up
+    for (var prop in object) {
+        if (_.isString(object[prop])) {
+            object[prop] = (object[prop].length > 0) ? object[prop] : null;
+        }
+    }
+
+    return object;
+}
 
 module.exports = utils;

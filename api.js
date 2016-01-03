@@ -130,16 +130,7 @@ module.exports = function(app) {
             'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
             'year', 'month', 'day'
         );
-
-
-        // Set empty strings to null
-        // (since frontend might pass some of the integer fields as string, this allows unsetting those)
-        // fields - otherwise DB barfs up
-        for (var prop in props) {
-            if (_.isString(props[prop])) {
-                props[prop] = (props[prop].length > 0) ? props[prop] : null;
-            }
-        }
+        props = utils.setEmptyStringsNull(props);
 
         modelController.update('Image', req.params.id, props)
         .then(newProps => handleResult(newProps, res, next))
