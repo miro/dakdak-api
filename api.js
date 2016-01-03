@@ -131,6 +131,16 @@ module.exports = function(app) {
             'year', 'month', 'day'
         );
 
+
+        // Set empty strings to null
+        // (since frontend might pass some of the integer fields as string, this allows unsetting those)
+        // fields - otherwise DB barfs up
+        for (var prop in props) {
+            if (_.isString(props[prop])) {
+                props[prop] = (props[prop].length > 0) ? props[prop] : null;
+            }
+        }
+
         modelController.update('Image', req.params.id, props)
         .then(newProps => handleResult(newProps, res, next))
         .error(error => next(new Error(error)));
