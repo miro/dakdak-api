@@ -2,8 +2,6 @@
 //      everything related to models - persons, images, spots
 //
 
-// TODO: auto sort on fetches, now the one which is edited by latest is returned as first
-
 'use strict';
 
 let Promise             = require('bluebird');
@@ -19,6 +17,7 @@ controller.getAll = function(modelType) {
     return new Promise((resolve, reject) => {
         new db
         .models[modelType]()
+        .query('orderBy', 'id', 'desc')
         .fetchAll()
         .then(items => resolve(items))
         .error(error => reject(error));
