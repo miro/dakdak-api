@@ -18,6 +18,8 @@ var app             = express();
 
 // ### Config
 
+var serverPort = process.env.PORT || 5000;
+
 // # Express middleware
 app.use(function allowCrossDomain(req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // HOX dev solution
@@ -82,6 +84,6 @@ app.use(function genericErrorHandler(err, req, res, next) { // 500
 
 
 // # Start the server
-app.listen(5000, function() {
-    log.info('Dakdak backend started at port 5000');
+app.listen(serverPort, function() {
+    log.info('Dakdak backend started at port', serverPort);
 });
