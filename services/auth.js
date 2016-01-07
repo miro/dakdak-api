@@ -5,13 +5,12 @@ var FacebookStrategy        = require('passport-facebook');
 
 var userController          = require('../controllers/user');
 var log                     = require('../log');
+var config                  = require('../configurator');
 
-const facebookCfg = {
-    clientID: process.env.DAKDAK_FB_APP_ID,
-    clientSecret: process.env.DAKDAK_FB_APP_SECRET,
-    callbackURL: 'http://localhost:5000/auth/facebook/callback', // TODO parameterize
-    profileFields: ['id', 'email', 'displayName'] // what fields to fetch from Facebook
-};
+// NOTE https://github.com/jaredhanson/passport-google-oauth/pull/81
+
+var facebookCfg = config.fb;
+facebookCfg.profileFields = ['id', 'email', 'displayName']; // what fields to fetch from Facebook
 
 // these are required for Passport to work
 passport.serializeUser((user, done) => done(null, user));

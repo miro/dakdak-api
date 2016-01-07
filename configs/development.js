@@ -23,5 +23,12 @@ cfg.jwt = {
     secret: 'super secret string, you should change this into something else!'
 };
 
+cfg.fb = { // Facebook config
+    clientID: process.env.DAKDAK_FB_APP_ID,
+    clientSecret: process.env.DAKDAK_FB_APP_SECRET,
+    callbackURL: 'http://localhost:5000/auth/facebook/callback'
+};
+
+
 
 module.exports = cfg;
