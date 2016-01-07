@@ -15,7 +15,8 @@ cfg.dbConfig = {
 cfg.gcs = {
     projectId: 'dakdak-1154',
     bucketName: 'dakdak-dev',
-    baseUrl: 'https://storage.googleapis.com'
+    baseUrl: 'https://storage.googleapis.com',
+    keyFilename: __dirname + '/keys/dakdak-gcs-storage-key.json'
 };
 
 cfg.jwt = {

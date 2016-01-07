@@ -3,10 +3,7 @@ var streamifier         = require('streamifier');
 var cfg                 = require('../configurator');
 var log                 = require('../log');
 
-var gcloud              = require('gcloud')({
-  keyFilename: __dirname + '/../configs/keys/dakdak-gcs-storage-key.json',
-  projectId: cfg.gcs.projectId
-});
+var gcloud              = require('gcloud')(cfg.gcs);
 
 var gcs = gcloud.storage();
 var bucket = gcs.bucket(cfg.gcs.bucketName);
@@ -29,6 +26,7 @@ service.uploadImageBuffer = function uploadImageAndMakePublic(imageName, imageBu
         }))
         .on('error', function(error) {
             log.error('Error on GCS upload!');
+            // TODO: this error won't result in a response from server
             reject(error);
         })
         .on('finish', function() {
