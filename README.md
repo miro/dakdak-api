@@ -16,6 +16,18 @@ Backend for "Dakdak image gallery". See also [Dakdak Management App](https://git
 	CREATE DATABASE dakdak WITH OWNER dakdak;
 
 
+# Deploying
+
+<TODO: how-to-deploy-this on Heroku> 
+
+Saving for further use; how to setup multi-line environment variable in Heroku (for eg private key):
+
+* Save your private key / multi-file var into a file, for eg `temp.txt`
+* (Make sure NOT to save that file into git)
+* Execute this
+* `heroku config:set DAKDAK_GCS_PRIVATE_KEY="$(cat temp.txt)"`
+* Profit!
+
 
 =======
 
