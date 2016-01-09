@@ -50,7 +50,7 @@ app.get('/auth/facebook/callback',
         log.debug('auth ok!', user);
         var token = tokenService.getToken(user);
 
-        res.render('auth-callback', { token, user });
+        res.render('auth-callback', { token, user, frontendUrl: config.frontendUrl });
     }
 );
 

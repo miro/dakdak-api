@@ -10,7 +10,7 @@ html(lang="en")
         console.log('Event received from the parent window!', event);
 
         // Send event back into it, if origin matches
-        if (event.origin === 'http://localhost:3000') { // TODO parameterize the URL
+        if (event.origin === '#{frontendUrl}') {
             event.source.postMessage('#{token}', '*');
             window.close();
         }
