@@ -26,7 +26,6 @@ service.uploadImageBuffer = function uploadImageAndMakePublic(imageName, imageBu
         }))
         .on('error', function(error) {
             log.error('Error on GCS upload!');
-            // TODO: this error won't result in a response from server
             reject(error);
         })
         .on('finish', function() {
