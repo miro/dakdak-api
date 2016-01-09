@@ -19,7 +19,12 @@ cfg.gcs = {
     "auth_uri": process.env.DAKDAK_GCS_AUTH_URI,
     "token_uri": process.env.DAKDAK_GCS_TOKEN_URI,
     "auth_provider_x509_cert_url": process.env.DAKDAK_GCS_AUTH_PROVIDER_X509_CERT_URL,
-    "client_x509_cert_url": process.env.DAKDAK_GCS_CLIENT_X509_CERT_URL
+    "client_x509_cert_url": process.env.DAKDAK_GCS_CLIENT_X509_CERT_URL,
+
+    credentials: {
+        "private_key": process.env.DAKDAK_GCS_PRIVATE_KEY,
+        "client_email": process.env.DAKDAK_GCS_CLIENT_EMAIL
+    }
 };
 
 cfg.jwt = { secret: process.env.DAKDAK_JWT_SECRET };
