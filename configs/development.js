@@ -1,5 +1,8 @@
 var cfg = {};
 
+cfg.deployUrl = 'http://localhost:5000';
+cfg.frontendUrl = 'http://localhost:3000';
+
 cfg.dbConfig = {
     client: 'postgresql',
     connection: {
@@ -26,7 +29,7 @@ cfg.jwt = {
 cfg.fb = { // Facebook config
     clientID: process.env.DAKDAK_FB_APP_ID,
     clientSecret: process.env.DAKDAK_FB_APP_SECRET,
-    callbackURL: 'http://localhost:5000/auth/facebook/callback'
+    callbackURL: cfg.deployUrl + '/auth/facebook/callback'
 };
 
 

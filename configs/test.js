@@ -1,5 +1,8 @@
 var cfg = {};
 
+cfg.deployUrl = process.env.DAKDAK_DEPLOY_URL;
+cfg.frontendUrl = process.env.DAKDAK_FRONTEND_URL;
+
 cfg.dbConfig = process.env.DATABASE_URL;
 
 cfg.gcs = {
@@ -24,7 +27,7 @@ cfg.jwt = { secret: process.env.DAKDAK_JWT_SECRET };
 cfg.fb = { // Facebook config
     clientID: process.env.DAKDAK_FB_APP_ID,
     clientSecret: process.env.DAKDAK_FB_APP_SECRET,
-    callbackURL: 'http://localhost:5000/auth/facebook/callback'
+    callbackURL: cfg.deployUrl + '/auth/facebook/callback'
 };
 
 

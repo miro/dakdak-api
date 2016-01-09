@@ -22,7 +22,7 @@ var serverPort = process.env.PORT || 5000;
 
 // # Express middleware
 app.use(function allowCrossDomain(req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // HOX dev solution
+    res.header('Access-Control-Allow-Origin', config.frontendUrl);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
