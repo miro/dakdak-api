@@ -8,6 +8,7 @@ let _                   = require('lodash');
 
 let db                  = require('../database');
 let log                 = require('../log');
+let roleService         = require('../services/role');
 
 let controller = {};
 
@@ -15,8 +16,8 @@ let controller = {};
 controller.getOrCreate = function(provider, providerId, props)  {
     return new Promise((resolve, reject) => {
         controller.getUser({ provider, providerId })
-        .then(result => {
-            if (_.isNull(result)) {
+        .then(userModel => {
+            if (_.isNull(userModel)) {
                 log.debug('New user registration!');
                 let userProps = parsePropsFromProvider(provider, props);
                 userProps.provider = provider;
@@ -26,7 +27,7 @@ controller.getOrCreate = function(provider, providerId, props)  {
             }
             else {
                 log.debug('Existing user login!');
-                return resolve(result.serialize());
+                return resolve(userModel);
             }
         });
     });
@@ -37,7 +38,7 @@ controller.getUser = function(whereObject) {
         new db.models.User()
         .where(whereObject)
         .fetch()
-        .then(result => resolve(result))
+        .then(result => resolve(formatUserModel(result)))
         .error(error => reject(error));
     });
 };
@@ -51,6 +52,20 @@ controller.createUser = function(props) {
         .error(error => reject(error));
     });
 };
+
+
+
+// This function takes in Bookshelf's User-model, serializes it,
+// and "solves" attributes required by this application into it
+function formatUserModel(userModel) {
+    // Parse the Bookshelf Model into vanilla JS object
+    var userObject = userModel.serialize();
+
+    // Do the required modifications into the object
+    roleService.solveRole(userObject);
+
+    return userObject;
+}
 
 
 function parsePropsFromProvider(provider, props) {

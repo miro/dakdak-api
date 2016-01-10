@@ -10,7 +10,7 @@ let service = {};
 
 service.getToken = function(userModel) {
     return jwt.sign(
-        _.pick(userModel, 'id', 'displayName', 'accessLevel'), // payload
+        _.pick(userModel, 'id', 'displayName', 'role'), // payload
         cfg.jwt.secret,
         { expiresIn: '12h' }
     );

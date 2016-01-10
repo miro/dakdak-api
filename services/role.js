@@ -44,6 +44,7 @@ const roles = service.roles; // shortcut for convenience
 
 
 // Replace user.accessLevel with the role name
+// Modifies the user object in-place!
 service.solveRole = function(user) {
     // Solve the role name
     var roleName = null;
