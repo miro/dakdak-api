@@ -22,6 +22,9 @@ cfg.gcs = {
     keyFilename: __dirname + '/keys/dakdak-gcs-storage-key.json'
 };
 
+cfg.googleAuth = require('./keys/google-oauth-credentials.js');
+cfg.googleAuth.callbackURL = cfg.deployUrl + '/auth/google/callback';
+
 cfg.jwt = {
     secret: 'super secret string, you should change this into something else!'
 };

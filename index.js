@@ -32,7 +32,7 @@ app.use(bodyParser.json()); // parse json
 
 app.use(passport.initialize());
 app.use(jwt({ secret: config.jwt.secret }).unless({
-    path: ['/auth/facebook', '/auth/facebook/callback']
+    path: ['/auth/facebook', '/auth/facebook/callback', '/auth/google', '/auth/google/callback']
 }));
 
 app.set('view engine', 'jade');
@@ -40,19 +40,35 @@ app.set('view engine', 'jade');
 
 // #### Routes
 
-// Auth related
+// ## Auth related
+// TODO: move these to some utility function inside authService?
+// Facebook
 app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['public_profile', 'email'] }));
-
 app.get('/auth/facebook/callback',
     passport.authenticate('facebook'),
     function(req, res) {
         var user = req.user;
-        log.debug('auth ok!', user);
         var token = tokenService.getToken(user);
+        log.debug('Auth OK via Facebook!', user);
 
         res.render('auth-callback', { token, user, frontendUrl: config.frontendUrl });
     }
 );
+
+// Google
+app.get('/auth/google', passport.authenticate('google', { scope: 'profile email' }));
+app.get('/auth/google/callback',
+    passport.authenticate('google'),
+    function(req, res) {
+        var user = req.user;
+        var token = tokenService.getToken(user);
+        log.debug('Auth OK via Google!', user);
+
+        res.render('auth-callback', { token, user, frontendUrl: config.frontendUrl });
+    }
+);
+
+
 
 // API
 require('./api')(app);

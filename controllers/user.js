@@ -56,6 +56,7 @@ controller.createUser = function(props) {
 function parsePropsFromProvider(provider, props) {
     switch(provider) {
         case 'facebook':
+        case 'google':
             let parsedProps = {};
             parsedProps.displayName = props.displayName;
 

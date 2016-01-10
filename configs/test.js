@@ -27,6 +27,12 @@ cfg.gcs = {
     }
 };
 
+cfg.googleAuth = {
+    clientID: process.env.DAKDAK_GOOGLEAUTH_CLIENTID,
+    clientSecret: process.env.DAKDAK_GOOGLEAUTH_SECRET,
+    callbackURL: cfg.deployUrl + '/auth/google/callback'
+};
+
 cfg.jwt = { secret: process.env.DAKDAK_JWT_SECRET };
 
 cfg.fb = { // Facebook config
