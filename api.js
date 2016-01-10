@@ -64,7 +64,8 @@ module.exports = function(app) {
     // Create spot
     app.post('/api/v0/spots', function(req, res, next) {
         modelController.create('Spot', {
-            name: req.body.name
+            name: req.body.name,
+            description: req.body.description
         })
         .then(function saveOk(newSpot) {
             handleResult(newSpot, res, next);
