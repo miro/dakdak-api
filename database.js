@@ -72,6 +72,7 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
         return bookshelf.knex.schema.createTable('images', function(t) {
             t.increments('id').primary();
             t.string('storageId', 60).unique(); // identifier for fetching this image on the storage solution (S3/GCS/etc)
+            t.timestamps();
 
             t.string('title', 140);
             t.string('trickName', 350);
@@ -85,7 +86,6 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
             t.boolean('published').defaultTo(false);
             t.boolean('hasThumbnailSize').defaultTo(false);
             t.boolean('hasDisplaySize').defaultTo(false);
-            // TODO: uploadDate?
 
             t.integer('uploaderId')
                 .unsigned()
