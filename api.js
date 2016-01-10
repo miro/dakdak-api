@@ -93,7 +93,8 @@ module.exports = function(app) {
             })
             .then(dbResult => {
                 handleResult(dbResult.serialize(), res, next);
-            });
+            })
+            .catch(error => next(error));
         })
         .catch(error => {
             log.error('Error on image creation', error);
