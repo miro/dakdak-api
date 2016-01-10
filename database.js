@@ -89,7 +89,7 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
 
             t.integer('uploaderId')
                 .unsigned()
-                .references('id').inTable('persons')
+                .references('id').inTable('users')
                 .onDelete('SET NULL');
 
             t.integer('riderId')
