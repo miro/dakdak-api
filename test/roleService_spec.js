@@ -6,6 +6,8 @@ const roles = roleService.roles;
 
 
 describe('roleService', () => {
+    // # accessLevel -> role tests
+    //
     it('sets user with undefined level to UNREGISTERED', () => {
         let user = roleService.solveRole({ name: 'foo' });
         expect(user.role).to.equal(roles.UNREGISTERED);
@@ -36,6 +38,45 @@ describe('roleService', () => {
         let user = createUser(10);
         roleService.solveRole(user);
         expect(user.accessLevel).to.equal(undefined);
+    });
+
+
+    // # isAuthorized-tests
+    //
+    it('will not authorize UNREGISTERED role to ADMIN', () => {
+        let user = { name: 'foo', role: roles.ADMIN };
+        const authorized = roleService.isAuthorized(user, roles.ADMIN);
+        expect(authorized).to.equal(true);
+    });
+
+    it('will authorize EDITOR role to USER', () => {
+        let user = { name: 'foo', role: roles.EDITOR };
+        const authorized = roleService.isAuthorized(user, roles.USER);
+        expect(authorized).to.equal(true);
+    });
+
+    it('will authorize UNREGISTERED role to UNREGISTERED', () => {
+        let user = { name: 'foo', role: roles.UNREGISTERED };
+        const authorized = roleService.isAuthorized(user, roles.UNREGISTERED);
+        expect(authorized).to.equal(true);
+    });
+
+    it('will NOT authorize USER role to ADMIN', () => {
+        let user = { name: 'foo', role: roles.USER };
+        const authorized = roleService.isAuthorized(user, roles.ADMIN);
+        expect(authorized).to.equal(false);
+    });
+
+    it('will NOT authorize UNREGISTERED role to USER', () => {
+        let user = { name: 'foo', role: roles.UNREGISTERED };
+        const authorized = roleService.isAuthorized(user, roles.USER);
+        expect(authorized).to.equal(false);
+    });
+
+    it('will NOT authorize udefined role to USER', () => {
+        let user = { name: 'foo', role: undefined };
+        const authorized = roleService.isAuthorized(user, roles.UNREGISTERED);
+        expect(authorized).to.equal(false);
     });
 });
 
