@@ -32,7 +32,12 @@ app.use(bodyParser.json()); // parse json
 
 app.use(passport.initialize());
 app.use(jwt({ secret: config.jwt.secret }).unless({
-    path: ['/auth/facebook', '/auth/facebook/callback', '/auth/google', '/auth/google/callback']
+    // list of paths which require no JWT token
+    path: [
+        '/auth/facebook', '/auth/facebook/callback',
+        '/auth/google', '/auth/google/callback',
+        'favicon.ico'
+    ]
 }));
 
 app.set('view engine', 'jade');
