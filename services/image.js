@@ -10,15 +10,18 @@ var service = {};
 service.uploadImage = function uploadImage(imageName, imageFile) {
     return new Promise((resolve, reject) => {
 
+        // TODO allow png+gif
         if (imageFile.mimetype !== 'image/jpeg') {
             log.info('Unsupported filetype detected');
             return reject({ status: 400, message: 'Unsupported file type uploaded' });
         }
 
+        autoOrient(imageFile.buffer)
+        .then(rotatedImageBuffer =>
         Promise.props({
-            thumb: _resizeIntoWidth(imageFile.buffer, 320),
-            displaySize: _resizeIntoWidth(imageFile.buffer, 640)
-        })
+            thumb: _resizeIntoWidth(rotatedImageBuffer, 320),
+            displaySize: _resizeIntoWidth(rotatedImageBuffer, 640)
+        }))
         .then(buffers => {
             Promise.props({
                 original: gcs.uploadImageBuffer(imageName, imageFile.buffer),
@@ -37,12 +40,19 @@ function _resizeIntoWidth(imageBuffer, width) {
         gm(imageBuffer)
         .resize(width)
         .toBuffer('JPG', ((error, resultBuffer) => {
-            if (error) {
-                return reject(error);
-            }
-            return resolve(resultBuffer);
+            (error) ? reject(error) : resolve(resultBuffer);
         }));
     });
+}
+
+function autoOrient(imageBuffer) {
+    return new Promise((resolve, reject) => {
+        gm(imageBuffer)
+        .autoOrient()
+        .toBuffer('JPG', ((error, resultBuffer) => {
+            (error) ? reject(error) : resolve(resultBuffer);
+        }))
+    })
 }
 
 module.exports = service;
