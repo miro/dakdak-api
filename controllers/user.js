@@ -58,6 +58,8 @@ controller.createUser = function(props) {
 // This function takes in Bookshelf's User-model, serializes it,
 // and "solves" attributes required by this application into it
 function formatUserModel(userModel) {
+    if (_.isNull(userModel)) return null;
+
     // Parse the Bookshelf Model into vanilla JS object
     var userObject = userModel.serialize();
 
