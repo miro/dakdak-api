@@ -3,7 +3,6 @@ var config              = require('./configurator.js');
 var knex                = require('knex')(config.dbConfig);
 var bookshelf           = require('bookshelf')(knex);
 
-
 // Organisations
 bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
     if (!exists) {
@@ -13,6 +12,23 @@ bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
         });
     }
 });
+
+
+// invitation codes
+bookshelf.knex.schema.hasTable('invitations').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('invitations', function(t) {
+            t.increments('id').primary();
+            t.string('code', 100); // the actual invitation code
+
+            t.integer('inviteToOrganisation') // if this invitation is for specific organisation, link it in here
+                .unsigned()
+                .references('id').inTable('organisations')
+                .onDelete('SET NULL');
+        });
+    }
+});
+
 
 // Persons
 bookshelf.knex.schema.hasTable('persons').then(function(exists) {
@@ -63,6 +79,10 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
                 .inTable('organisations')
                 .onDelete('SET NULL');
 
+            t.integer('invitationId')
+                .unsigned()
+                .references('id').inTable('invitations')
+                .onDelete('SET NULL');
         });
     }
 });
@@ -120,6 +140,9 @@ var models = {};
 
 models.Image = bookshelf.Model.extend({
     tableName: 'images'
+});
+models.Invites = bookshelf.Model.extend({
+    tableName: 'invitations'
 });
 models.Person = bookshelf.Model.extend({
     tableName: 'persons'
