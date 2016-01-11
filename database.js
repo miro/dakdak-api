@@ -21,11 +21,6 @@ bookshelf.knex.schema.hasTable('persons').then(function(exists) {
             t.increments('id').primary();
             t.string('fullName', 50);
             t.string('displayName', 20);
-
-            t.integer('organisationId')
-                .unsigned()
-                .references('id')
-                .inTable('organisations');
         });
     }
 });
@@ -61,6 +56,13 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
                 .unsigned()
                 .references('id').inTable('persons')
                 .onDelete('SET NULL');
+
+            t.integer('organisationId')
+                .unsigned()
+                .references('id')
+                .inTable('organisations')
+                .onDelete('SET NULL');
+
         });
     }
 });
