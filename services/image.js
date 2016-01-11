@@ -9,8 +9,8 @@ var service = {};
 
 service.uploadImage = function uploadImage(imageName, imageFile) {
 
-    // TODO allow png+gif
-    if (imageFile.mimetype !== 'image/jpeg') {
+    var allowedMimetypes = ['image/jpeg', 'image/gif', 'image/png'];
+    if (allowedMimetypes.indexOf(imageFile.mimetype) < 0) {
         log.info('Unsupported filetype detected');
         return Promise.reject({ status: 400, message: 'Unsupported file type uploaded' });
     }
