@@ -8,6 +8,8 @@ bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
     if (!exists) {
         return bookshelf.knex.schema.createTable('organisations', function(t) {
             t.increments('id').primary();
+            t.string('avatarStorageId', 60); // if organisation has logo in the bucket
+            t.boolean('avatarHasThumbnailSize').defaultTo(false);
             t.string('name', 50);
         });
     }
@@ -131,8 +133,6 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
         });
     }
 });
-
-
 
 
 // # Define models
