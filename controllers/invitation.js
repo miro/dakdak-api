@@ -73,6 +73,7 @@ controller.checkInvitation = function(code, user) {
             if (roleService.config[INVITEES_USER_ROLE].level > models.user.get('accessLevel')) {
                 // the new role would be an upgrade
                 models.user.set('accessLevel', roleService.config[INVITEES_USER_ROLE].level);
+                models.user.set('role', roleService.config[INVITEES_USER_ROLE].name);
             }
 
             if (models.invite.get('inviteToOrganisation')) {
