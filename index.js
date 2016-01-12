@@ -95,12 +95,12 @@ app.use(function handle404(err, req, res, next) { // 404
 
 app.use(function genericErrorHandler(err, req, res, next) { // 500
     // TODO the err.status is always unset, this needs a custom error implementation
-    if (_.isUndefined(err.status)) {
-        err.status = 500;
-    }
+    log.error('Handling', err.name); // log the error
+
+    var statusCode = 500;
 
     log.error(err); // log the error
-    res.status(err.status).send(err); // send response
+    res.status(statusCode).jsonp({ error: err.message }); // send response
 });
 
 
