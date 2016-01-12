@@ -64,7 +64,9 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
             t.increments('id').primary();
             t.string('email', 100);
             t.string('displayName', 50);
+
             t.integer('accessLevel').defaultTo(0);
+            t.string('role', 100);
 
             t.string('provider', 150); // who has authorized this user? Facebook, Google, ..., ?
             t.string('providerId', 150); // what is the ID on the provider's system for this user?
