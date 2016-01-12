@@ -15,7 +15,7 @@ let controller = {};
 
 controller.getOrCreate = function(provider, providerId, props)  {
     return new Promise((resolve, reject) => {
-        controller.getUser({ provider, providerId })
+        controller.get({ provider, providerId })
         .then(userModel => {
             if (_.isNull(userModel)) {
                 log.debug('New user registration!');
@@ -23,7 +23,7 @@ controller.getOrCreate = function(provider, providerId, props)  {
                 userProps.provider = provider;
                 userProps.providerId = providerId;
 
-                return resolve(controller.createUser(userProps));
+                return resolve(controller.create(userProps));
             }
             else {
                 log.debug('Existing user login!');
@@ -33,17 +33,14 @@ controller.getOrCreate = function(provider, providerId, props)  {
     });
 };
 
-controller.getUser = function(whereObject) {
-    return new Promise((resolve, reject) => {
-        new db.models.User()
-        .where(whereObject)
-        .fetch()
-        .then(result => resolve(formatUserModel(result)))
-        .error(error => reject(error));
-    });
+controller.get = function(whereObject) {
+    return new db.models.User()
+    .where(whereObject)
+    .fetch()
+    .then(result => Promise.resolve(formatUserModel(result)));
 };
 
-controller.createUser = function(props) {
+controller.create = function(props) {
     // TODO: match to person automatically if displayName matches?
     return new Promise((resolve, reject) => {
         let model = new db.models.User(props);
@@ -60,13 +57,10 @@ controller.createUser = function(props) {
 function formatUserModel(userModel) {
     if (_.isNull(userModel)) return null;
 
-    // Parse the Bookshelf Model into vanilla JS object
-    var userObject = userModel.serialize();
-
     // Do the required modifications into the object
-    roleService.solveRole(userObject);
+    roleService.solveRole(userModel);
 
-    return userObject;
+    return userModel;
 }
 
 

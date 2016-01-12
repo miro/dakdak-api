@@ -9,9 +9,8 @@ var log                     = require('../log');
 var config                  = require('../configurator');
 
 // these are required for Passport to work
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
-
+passport.serializeUser((user, done) => done(null, user.serialize()));
+passport.deserializeUser((user, done) => done(null, user)); // TODO do we need to create Bookshelf-model in here?
 
 
 // # Facebook
@@ -23,7 +22,7 @@ passport.use(new FacebookStrategy(facebookCfg, (accessToken, refreshToken, profi
     log.debug('Auth ok from Facebook! Syncing with our own database...');
     userController.getOrCreate('facebook', profile.id, profile)
     .then(userModel => {
-        log.debug('User created/fetched via Facebook', userModel.id);
+        log.debug('User created/fetched via Facebook', userModel.get('id'));
         done(null, userModel);
     });
 }));
@@ -37,7 +36,7 @@ passport.use(new GoogleStrategy(config.googleAuth,
 
     userController.getOrCreate('google', profile.id, profile)
     .then(userModel => {
-        log.debug('User created/fetched via Google', userModel.id);
+        log.debug('User created/fetched via Google', userModel.get('id'));
         done(null, userModel);
     });
   }
