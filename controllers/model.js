@@ -1,7 +1,7 @@
 // # modelController
-//      everything related to models - persons, images, spots
+//      everything related to models (models being everything that hasn't got dedicated controller)
+//      including persons, images, spots, organisations
 //
-
 'use strict';
 
 let Promise             = require('bluebird');
