@@ -2,6 +2,7 @@ var config              = require('./configurator.js');
 
 var knex                = require('knex')(config.dbConfig);
 var bookshelf           = require('bookshelf')(knex);
+var _                   = require('lodash');
 
 // Organisations
 bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
@@ -138,12 +139,13 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
 
 
 // # Define models
+// TODO: move to schema.js?
 var models = {};
 
 models.Image = bookshelf.Model.extend({
     tableName: 'images'
 });
-models.Invites = bookshelf.Model.extend({
+models.Invitation = bookshelf.Model.extend({
     tableName: 'invitations'
 });
 models.Person = bookshelf.Model.extend({
@@ -159,11 +161,15 @@ models.Organisation = bookshelf.Model.extend({
     tableName: 'organisations'
 });
 
-
+var types = _.reduce(models, (result, item, key) => {
+    result[key] = key;
+    return result;
+ }, {});
 
 module.exports = {
     bookshelf: bookshelf,
     models: models,
+    types: types,
     knex: bookshelf.knex
 }
 
