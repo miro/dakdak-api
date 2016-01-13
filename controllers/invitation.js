@@ -54,8 +54,6 @@ controller.checkInvitation = function(code, user) {
             user: userController.get({ id: user.id })
         }))
         .then(models => {
-            console.log(models);
-            log.debug('we should be here ONLY if user was eliglible to challenge the code');
             if (!models.invite) {
                 return Promise.reject('Invitation code invalid');
             }
@@ -66,29 +64,28 @@ controller.checkInvitation = function(code, user) {
 
             // # invitation was kosher -> update user
 
-            let userProps = {}; // these will be updated into user
-
             models.user.set('invitationId', models.invite.get('id'));
 
+            // Update user accessLevel only if it would be an upgrade
             if (roleService.config[INVITEES_USER_ROLE].level > models.user.get('accessLevel')) {
                 // the new role would be an upgrade
                 models.user.set('accessLevel', roleService.config[INVITEES_USER_ROLE].level);
                 models.user.set('role', roleService.config[INVITEES_USER_ROLE].name);
             }
 
+            // If this invite is invitation to some organisation, set user into that
             if (models.invite.get('inviteToOrganisation')) {
                 models.user.set('organisationId', models.invite.get('inviteToOrganisation'));
             }
 
-            log.debug('User had the right invitation object - updating user with properties', models.user.serialize());
+            log.debug('User had the right invitation code - updating user with properties', models.user.serialize());
             return models.user.save();
         })
         .then(userModel => Promise.resolve(userModel))
-        // .error(error => Promise.reject(error))
         .catch(error => {
-            console.log('error plz');
-            console.log(error);
-            return Promise.reject(error);
+            let ErrorObject = new Error(error);
+            ErrorObject.status = 400;
+            return Promise.reject(ErrorObject);
         });
 };
 
