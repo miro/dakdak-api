@@ -1,10 +1,12 @@
+'use strict';
+
 var express         = require('express');
 var bodyParser      = require('body-parser');
 var Promise         = require('bluebird');
 var _               = require('lodash');
 var passport        = require('passport');
 var jwt             = require('express-jwt');
-
+var http            = require('http');
 
 var config          = require('./configurator');
 var api             = require('./api');
@@ -93,14 +95,43 @@ app.use(function handle404(err, req, res, next) { // 404
     res.send(err.message || '404 Content not found - but such are the mysteries of the Internet sometimes');
 });
 
-app.use(function genericErrorHandler(err, req, res, next) { // 500
-    // TODO the err.status is always unset, this needs a custom error implementation
-    log.error('Handling', err.name); // log the error
 
-    var statusCode = 500;
+app.use(function errorLogger(err, req, res, next) {
+    const status = err.status ? err.status : 500;
 
-    log.error(err); // log the error
-    res.status(statusCode).jsonp({ error: err.message }); // send response
+    if (status >= 400) {
+        log.error('Request headers:');
+        log.error(JSON.stringify(req.headers));
+        log.error('Request body:');
+        log.error(JSON.stringify(req.body));
+    }
+
+    if (config.env === 'test' && status >= 500 ||
+        config.env === 'development') {
+        console.log(err.stack);
+    }
+
+    next(err);
+});
+
+app.use(function errorResponder(err, req, res, next) {
+    const status = err.status ? err.status : 500;
+    const httpMessage = http.STATUS_CODES[status];
+
+    let message;
+    if (status < 500) {
+        message = httpMessage + ': ' + err.message;
+    } else {
+        message = httpMessage;
+    }
+
+    let response = {message: message};
+    if (err.data) {
+        response.errors = err.data;
+    }
+
+    res.status(status);
+    res.send(response);
 });
 
 

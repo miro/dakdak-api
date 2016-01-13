@@ -178,7 +178,7 @@ module.exports = function(app) {
                 userProfile: updatedUserModel.serialize(),
                 newToken: tokenService.getToken(updatedUserModel.serialize())
         }, res, next))
-        .catch(error => next(new Error(error)));
+        .catch(error => next(error));
     });
 
 
