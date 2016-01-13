@@ -2,6 +2,7 @@
 //      everything related to models (models being everything that hasn't got dedicated controller)
 //      including persons, images, spots, organisations
 //
+// TODO: remove redundant then/error -blocks
 'use strict';
 
 let Promise             = require('bluebird');
@@ -24,15 +25,10 @@ controller.getAll = function(modelType) {
     });
 };
 
-controller.getSingle = function(modelType, whereObject) {
-    // TODO: fetch only one row?
-    return new Promise((resolve, reject) => {
-        new db.models[modelType]()
-        .where(whereObject)
-        .fetch()
-        .then(result => resolve(result))
-        .error(error => reject(error));
-    });
+controller.getSingle = function(modelType, whereObject, opts) {
+    return new db.models[modelType]()
+    .where(whereObject)
+    .fetch(opts);
 };
 
 
