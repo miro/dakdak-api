@@ -34,7 +34,7 @@ cache.isAllowedToTry = function(user) {
     else {
         log.debug('Maximum try count reached - denying for user', user.id, '!');
         let error = new Error('Maximum try count reached');
-        error.name = 'INVALID_REQUEST';
+        error.status = 403;
         return Promise.reject(error);
     }
 };
@@ -55,11 +55,15 @@ controller.checkInvitation = function(code, user) {
         }))
         .then(models => {
             if (!models.invite) {
-                return Promise.reject('Invitation code invalid');
+                let error = new Error('Invitation code invalid');
+                error.status = 400;
+                return Promise.reject(error);
             }
 
             if (models.user.get('invitationId')) {
-                return Promise.reject('User has already used one of the invitation codes');
+                let error = new Error('User has already used one of the invitation codes');
+                error.status = 410;
+                return Promise.reject(error);
             }
 
             // # invitation was kosher -> update user
@@ -83,9 +87,7 @@ controller.checkInvitation = function(code, user) {
         })
         .then(userModel => Promise.resolve(userModel))
         .catch(error => {
-            let ErrorObject = new Error(error);
-            ErrorObject.status = 400;
-            return Promise.reject(ErrorObject);
+            return Promise.reject(error);
         });
 };
 
