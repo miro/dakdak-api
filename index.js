@@ -114,7 +114,7 @@ app.use(function errorLogger(err, req, res, next) {
     next(err);
 });
 
-app.use(function errorResponder(err, req, res, next) {
+app.use(function errorResponder(err, req, res) {
     const status = err.status ? err.status : 500;
     const httpMessage = http.STATUS_CODES[status];
 

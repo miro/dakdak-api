@@ -42,7 +42,7 @@ service.roles = {};
 _.each(rolesConfig, role => service.roles[role.name] = role.name);
 const roles = service.roles; // shortcut for convenience
 
-service.config = _.reduce(rolesConfig, (result, item, key) => {
+service.config = _.reduce(rolesConfig, (result, item) => {
     result[item.name] = item;
     return result;
 }, {});
