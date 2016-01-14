@@ -6,6 +6,10 @@ const roles = roleService.roles;
 
 
 describe('roleService', () => {
+    // TODO: FIX THESE TO WORK WITH USER-BOOKSHELF-MODELS instead of PLAIN OBJECTS
+    // :(
+
+
     // # accessLevel -> role tests
     //
     it('sets user with undefined level to UNREGISTERED', () => {

@@ -9,8 +9,9 @@ var cfg         = require('../configurator');
 let service = {};
 
 service.getToken = function(userModel) {
+    let user = userModel.serialize();
     return jwt.sign(
-        _.pick(userModel, 'id', 'displayName', 'role'), // payload
+        _.pick(user, 'id', 'displayName', 'role', 'organisationId', 'invitationId'), // payload
         cfg.jwt.secret,
         { expiresIn: '12h' }
     );

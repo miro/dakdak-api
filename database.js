@@ -2,17 +2,36 @@ var config              = require('./configurator.js');
 
 var knex                = require('knex')(config.dbConfig);
 var bookshelf           = require('bookshelf')(knex);
-
+var _                   = require('lodash');
 
 // Organisations
 bookshelf.knex.schema.hasTable('organisations').then(function(exists) {
     if (!exists) {
         return bookshelf.knex.schema.createTable('organisations', function(t) {
             t.increments('id').primary();
+            t.string('avatarStorageId', 60); // if organisation has logo in the bucket
+            t.boolean('avatarHasThumbnailSize').defaultTo(false);
             t.string('name', 50);
         });
     }
 });
+
+
+// invitation codes
+bookshelf.knex.schema.hasTable('invitations').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('invitations', function(t) {
+            t.increments('id').primary();
+            t.string('code', 100); // the actual invitation code
+
+            t.integer('inviteToOrganisation') // if this invitation is for specific organisation, link it in here
+                .unsigned()
+                .references('id').inTable('organisations')
+                .onDelete('SET NULL');
+        });
+    }
+});
+
 
 // Persons
 bookshelf.knex.schema.hasTable('persons').then(function(exists) {
@@ -21,11 +40,6 @@ bookshelf.knex.schema.hasTable('persons').then(function(exists) {
             t.increments('id').primary();
             t.string('fullName', 50);
             t.string('displayName', 20);
-
-            t.integer('organisationId')
-                .unsigned()
-                .references('id')
-                .inTable('organisations');
         });
     }
 });
@@ -51,7 +65,9 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
             t.increments('id').primary();
             t.string('email', 100);
             t.string('displayName', 50);
+
             t.integer('accessLevel').defaultTo(0);
+            t.string('role', 100);
 
             t.string('provider', 150); // who has authorized this user? Facebook, Google, ..., ?
             t.string('providerId', 150); // what is the ID on the provider's system for this user?
@@ -60,6 +76,17 @@ bookshelf.knex.schema.hasTable('users').then(function(exists) {
             t.integer('personId')
                 .unsigned()
                 .references('id').inTable('persons')
+                .onDelete('SET NULL');
+
+            t.integer('organisationId')
+                .unsigned()
+                .references('id')
+                .inTable('organisations')
+                .onDelete('SET NULL');
+
+            t.integer('invitationId')
+                .unsigned()
+                .references('id').inTable('invitations')
                 .onDelete('SET NULL');
         });
     }
@@ -111,13 +138,15 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
 });
 
 
-
-
 // # Define models
+// TODO: move to schema.js?
 var models = {};
 
 models.Image = bookshelf.Model.extend({
     tableName: 'images'
+});
+models.Invitation = bookshelf.Model.extend({
+    tableName: 'invitations'
 });
 models.Person = bookshelf.Model.extend({
     tableName: 'persons'
@@ -132,11 +161,15 @@ models.Organisation = bookshelf.Model.extend({
     tableName: 'organisations'
 });
 
-
+var types = _.reduce(models, (result, item, key) => {
+    result[key] = key;
+    return result;
+ }, {});
 
 module.exports = {
     bookshelf: bookshelf,
     models: models,
+    types: types,
     knex: bookshelf.knex
 }
 

@@ -42,26 +42,30 @@ service.roles = {};
 _.each(rolesConfig, role => service.roles[role.name] = role.name);
 const roles = service.roles; // shortcut for convenience
 
+service.config = _.reduce(rolesConfig, (result, item) => {
+    result[item.name] = item;
+    return result;
+}, {});
+
 
 // Replace user.accessLevel with the role name
 // Modifies the user object in-place!
-service.solveRole = function(user) {
+service.solveRole = function(userModel) {
     // Solve the role name
     var roleName = null;
 
-    if (_.isUndefined(user.accessLevel)) {
+    if (_.isUndefined(userModel.get('accessLevel'))) {
         roleName = roles.UNREGISTERED;
     }
 
-    const role = _.findLast(rolesConfig, role => (user.accessLevel >= role.level));
+    const role = _.findLast(rolesConfig, role => (userModel.get('accessLevel') >= role.level));
     if (!_.isUndefined(role)) {
         roleName = role.name;
     }
 
     // Update that name to user and return it
-    user.role = roleName;
-    delete user.accessLevel;
-    return user;
+    userModel.set('role', roleName);
+    return userModel;
 };
 
 

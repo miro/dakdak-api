@@ -6,9 +6,13 @@ var multer  = require('multer');
 var config              = require('./configurator');
 var db                  = require('./database');
 var log                 = require('./log');
-var imageService        = require('./services/image');
-var modelController     = require('./controllers/model');
 var utils               = require('./utils');
+
+var imageService            = require('./services/image');
+var tokenService            = require('./services/token');
+
+var modelController         = require('./controllers/model');
+var invitationController    = require('./controllers/invitation');
 
 
 // multer init
@@ -49,7 +53,6 @@ module.exports = function(app) {
 
     // # Create-operations
     //
-
     // Create person
     app.post('/api/v0/persons', function(req, res, next) {
         modelController.create('Person', {
@@ -104,9 +107,9 @@ module.exports = function(app) {
     });
 
 
+
     // # Update-operations
     //
-
     // Update person
     app.put('/api/v0/persons/:id', function(req, res, next) {
         modelController.update('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
@@ -162,6 +165,20 @@ module.exports = function(app) {
         modelController.delete('Image', req.params.id)
         .then(() => res.sendStatus(200))
         .error(error => next(new Error(error)));
+    });
+
+
+
+    // # Invitation codes
+    //
+    // Check invitation
+    app.post('/api/v0/invitation', function(req, res, next) {
+        invitationController.checkInvitation(req.body.invitationCode, req.user)
+        .then((updatedUserModel) => handleResult({
+                userProfile: updatedUserModel.serialize(),
+                newToken: tokenService.getToken(updatedUserModel)
+        }, res, next))
+        .catch(error => next(error));
     });
 
 
