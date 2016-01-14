@@ -176,7 +176,7 @@ module.exports = function(app) {
         invitationController.checkInvitation(req.body.invitationCode, req.user)
         .then((updatedUserModel) => handleResult({
                 userProfile: updatedUserModel.serialize(),
-                newToken: tokenService.getToken(updatedUserModel.serialize())
+                newToken: tokenService.getToken(updatedUserModel)
         }, res, next))
         .catch(error => next(error));
     });
