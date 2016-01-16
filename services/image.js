@@ -1,21 +1,21 @@
+// # imagesService
+//      everything related to image manipulation
+//
+'use strict';
+
 var Promise         = require('bluebird');
 var gm              = require('gm').subClass({ imageMagick: true });
 
 var log             = require('../log');
 var gcs             = require('./gcs');
 
-
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/gif', 'image/png'];
 var service = {};
 
 service.uploadImage = function uploadImage(imageName, imageFile) {
 
-    var allowedMimetypes = ['image/jpeg', 'image/gif', 'image/png'];
-    if (allowedMimetypes.indexOf(imageFile.mimetype) < 0) {
-        log.info('Unsupported filetype detected');
-        return Promise.reject({ status: 400, message: 'Unsupported file type uploaded' });
-    }
-
     return Promise.resolve()
+    .then(() => validateMimeType(imageFile.mimetype))
     .then(() => autoOrient(imageFile.buffer))
     .then(rotatedImageBuffer => Promise.props({
         thumb: resizeIntoWidth(rotatedImageBuffer, 320),
@@ -26,12 +26,21 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
         thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
         display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize)
     }))
-    .then(uploads => uploads)
-    .catch(error => {
-        log.error(error);
-        return new Error(error);
-    });
+    .then(uploads => uploads);
 };
+
+
+function validateMimeType(mimetype) {
+    if (ALLOWED_MIME_TYPES.indexOf(mimetype) < 0) {
+        log.info('Unsupported filetype detected');
+        let error = new Error('Unsupported file type uploaded');
+        error.status = 400;
+        return Promise.reject(error);
+    }
+    else {
+        return Promise.resolve();
+    }
+}
 
 function resizeIntoWidth(imageBuffer, width) {
     return new Promise((resolve, reject) => {

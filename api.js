@@ -83,23 +83,18 @@ module.exports = function(app) {
         var defaultTitle = utils.solveTitleFromFilename(file.originalname);
 
         imageService.uploadImage(fileStorageId, file)
-        .then(uploadResult => {
-            modelController.create('Image', {
-                storageId: fileStorageId,
-                uploaderId: req.user.id,
-                created_at: new Date(),
-                hasThumbnailSize: uploadResult.thumb.uploaded,
-                hasDisplaySize: uploadResult.display.uploaded,
+        .then(uploadResult => modelController.create('Image', {
+            storageId: fileStorageId,
+            uploaderId: req.user.id,
+            created_at: new Date(),
+            hasThumbnailSize: uploadResult.thumb.uploaded,
+            hasDisplaySize: uploadResult.display.uploaded,
 
-                year: req.body.year,
-                month: req.body.month,
-                title: defaultTitle
-            })
-            .then(dbResult => {
-                handleResult(dbResult.serialize(), res, next);
-            })
-            .catch(error => next(error));
-        })
+            year: req.body.year,
+            month: req.body.month,
+            title: defaultTitle
+        }))
+        .then(dbResult => handleResult(dbResult.serialize(), res, next))
         .catch(error => {
             log.error('Error on image creation', error);
             next(error);
