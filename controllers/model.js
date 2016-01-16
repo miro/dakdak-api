@@ -13,6 +13,9 @@ let log                 = require('../log');
 
 let controller = {};
 
+controller.getCount = function(modelType) {
+    return db.models[modelType].count();
+};
 
 controller.getAll = function(modelType) {
     return new Promise((resolve, reject) => {
@@ -24,6 +27,7 @@ controller.getAll = function(modelType) {
         .error(error => reject(error));
     });
 };
+
 
 controller.getSingle = function(modelType, whereObject, opts) {
     return new db.models[modelType]()
