@@ -26,8 +26,7 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
         thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
         display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize),
         meta: getImageInfos(imageFile.buffer)
-    }))
-    .then(uploads => uploads);
+    }));
 };
 
 
