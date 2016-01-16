@@ -13,6 +13,7 @@ var tokenService            = require('./services/token');
 
 var modelController         = require('./controllers/model');
 var invitationController    = require('./controllers/invitation');
+var kpiController           = require('./controllers/kpi');
 
 
 // multer init
@@ -25,6 +26,12 @@ var generateUUID        = utils.generateUUID;
 
 
 module.exports = function(app) {
+    // # "Key Performance Indicator"
+    // requires no authentication
+    app.get('/api/v0/kpi', function(req, res, next) {
+        handleResult(kpiController.getKpi(), res, next);
+    });
+
     // # Basic bulk fetches
     //
     app.get('/api/v0/persons', function(req, res, next) {

@@ -38,7 +38,8 @@ app.use(jwt({ secret: config.jwt.secret }).unless({
     path: [
         '/auth/facebook', '/auth/facebook/callback',
         '/auth/google', '/auth/google/callback',
-        'favicon.ico'
+        'favicon.ico',
+        '/api/v0/kpi'
     ]
 }));
 
