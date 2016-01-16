@@ -104,7 +104,10 @@ module.exports = function(app) {
             month: req.body.month,
             title: defaultTitle
         }))
-        .then(dbResult => handleResult(dbResult.serialize(), res, next))
+        .then(dbResult => {
+            kpiController.updateKpi();
+            handleResult(dbResult.serialize(), res, next);
+        })
         .catch(error => {
             log.error('Error on image creation', error);
             next(error);
