@@ -104,7 +104,10 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
             t.string('title', 140);
             t.string('trickName', 350);
             t.text('description');
+
             t.string('primaryColor', 10);
+            t.integer('width');
+            t.integer('height');
 
             t.integer('year');
             t.integer('month');
