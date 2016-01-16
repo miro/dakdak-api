@@ -90,6 +90,9 @@ module.exports = function(app) {
             hasThumbnailSize: uploadResult.thumb.uploaded,
             hasDisplaySize: uploadResult.display.uploaded,
 
+            width: uploadResult.meta.width,
+            height: uploadResult.meta.height,
+
             year: req.body.year,
             month: req.body.month,
             title: defaultTitle

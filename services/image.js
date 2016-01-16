@@ -24,7 +24,8 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
     .then(buffers => Promise.props({
         original: gcs.uploadImageBuffer(imageName, imageFile.buffer),
         thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
-        display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize)
+        display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize),
+        meta: getImageInfos(imageFile.buffer)
     }))
     .then(uploads => uploads);
 };
@@ -40,6 +41,17 @@ function validateMimeType(mimetype) {
     else {
         return Promise.resolve();
     }
+}
+
+function getImageInfos(imageBuffer) {
+    let meta = {};
+    gm(imageBuffer)
+    .size((err, size) => {
+        meta.width = size.width;
+        meta.height = size.height;
+    })
+
+    return Promise.resolve(meta);
 }
 
 function resizeIntoWidth(imageBuffer, width) {
