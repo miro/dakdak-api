@@ -2,7 +2,7 @@ var Promise         = require('bluebird');
 var gm              = require('gm').subClass({ imageMagick: true });
 
 var log             = require('../log');
-var gcs             = require('./googleCloud');
+var gcs             = require('./gcs');
 
 
 var service = {};
