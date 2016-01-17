@@ -51,15 +51,6 @@ module.exports = function(app) {
     });
 
 
-    // # Get single entity
-    //
-    // Image
-    app.get('/api/v0/images/:id', function(req, res, next) {
-        modelController.getSingle('Image', { id: req.params.id })
-        .then(result => handleResult(result, res, next));
-    });
-
-
 
     // # Create-operations
     //
