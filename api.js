@@ -159,21 +159,21 @@ module.exports = function(app) {
     // # Delete-operations
     //
     // Delete person
-    app.delete('/api/v0/persons/:id', function(req, res, next) {
+    app.delete('/api/v0/persons/:id', requiredRole(roles.ADMIN), function(req, res, next) {
         modelController.delete('Person', req.params.id)
         .then(() => res.sendStatus(200))
         .error(error => next(new Error(error)));
     });
 
     // Delete spot
-    app.delete('/api/v0/spots/:id', function(req, res, next) {
+    app.delete('/api/v0/spots/:id', requiredRole(roles.ADMIN), function(req, res, next) {
         modelController.delete('Spot', req.params.id)
         .then(() => res.sendStatus(200))
         .error(error => next(new Error(error)));
     });
 
     // Delete image
-    app.delete('/api/v0/images/:id', function(req, res, next) {
+    app.delete('/api/v0/images/:id', requiredRole(roles.ADMIN), function(req, res, next) {
         modelController.delete('Image', req.params.id)
         .then(() => res.sendStatus(200))
         .error(error => next(new Error(error)));
