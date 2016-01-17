@@ -122,14 +122,14 @@ module.exports = function(app) {
     // # Update-operations
     //
     // Update person
-    app.put('/api/v0/persons/:id', function(req, res, next) {
+    app.put('/api/v0/persons/:id', requiredRole(roles.EDITOR), function(req, res, next) {
         modelController.update('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
         .then(newProps => handleResult(newProps, res, next))
         .error(error => next(new Error(error)));
     });
 
     // Update spot
-    app.put('/api/v0/spots/:id', function(req, res, next) {
+    app.put('/api/v0/spots/:id', requiredRole(roles.EDITOR), function(req, res, next) {
         modelController.update('Spot', req.params.id, {
             name: req.body.name,
             description: req.body.description,
@@ -141,7 +141,8 @@ module.exports = function(app) {
     });
 
     // Update image
-    app.put('/api/v0/images/:id', function(req, res, next) {
+    // TODO: for normal users allow updating only images uploaded by user or the user organisation
+    app.put('/api/v0/images/:id', requiredRole(roles.EDITOR), function(req, res, next) {
         var props = _.pick(req.body,
             'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
             'year', 'month', 'day'
