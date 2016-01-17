@@ -88,7 +88,24 @@ service.isAuthorized = function checkUserHasRequiredUserLevel(user, requiredRole
         log.debug('Fallbacked to false in authorization');
         return false;
     }
-
 };
+
+
+// Middleware for defining required role to Express route
+// this uses service.isAuthorized while checking it
+service.requiredRoleMiddleware = function(requiredRole) {
+    // TODO: should the resulting function be cached somehow? does this create a new function
+    // on each call?
+    // (http://stackoverflow.com/questions/12737148/creating-a-expressjs-middleware-that-accepts-parameters)
+    return function(req, res, next) {
+        if (service.isAuthorized(req.user, requiredRole)) {
+            next();
+        }
+        else {
+            res.sendStatus(403); // 403 forbidden
+        }
+    };
+}
+
 
 module.exports = service;
