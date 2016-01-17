@@ -10,6 +10,7 @@ var utils               = require('./utils');
 
 var imageService            = require('./services/image');
 var tokenService            = require('./services/token');
+var roleService             = require('./services/role');
 
 var modelController         = require('./controllers/model');
 var invitationController    = require('./controllers/invitation');
@@ -20,9 +21,11 @@ var kpiController           = require('./controllers/kpi');
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
-// Shortcuts for utils functions
+// Shortcuts
 var handleResult        = utils.handleResult;
 var generateUUID        = utils.generateUUID;
+var requiredRole        = roleService.requiredRoleMiddleware;
+var roles               = roleService.roles;
 
 
 module.exports = function(app) {
@@ -61,7 +64,7 @@ module.exports = function(app) {
     // # Create-operations
     //
     // Create person
-    app.post('/api/v0/persons', function(req, res, next) {
+    app.post('/api/v0/persons', requiredRole(roles.EDITOR), function(req, res, next) {
         modelController.create('Person', {
             fullName: req.body.fullName,
             displayName: req.body.displayName
@@ -72,7 +75,7 @@ module.exports = function(app) {
     });
 
     // Create spot
-    app.post('/api/v0/spots', function(req, res, next) {
+    app.post('/api/v0/spots', requiredRole(roles.EDITOR), function(req, res, next) {
         modelController.create('Spot', {
             name: req.body.name,
             description: req.body.description
