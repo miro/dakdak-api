@@ -24,7 +24,7 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
     }))
     .then(buffers => {
         log.debug('Image resizing and stuff OK, starting uploads');
-        Promise.props({
+        return new Promise.props({
             original: gcs.uploadImageBuffer(imageName, imageFile.buffer),
             thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
             display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize),
