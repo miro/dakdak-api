@@ -31,12 +31,6 @@ utils.handleResult = function handleResult(result, res, next) {
     }
 };
 
-utils.solveTitleFromFilename = function(filename) {
-    var nameParts = filename.split('.');
-    nameParts.pop(); // remove extension
-    return nameParts.join('-');
-};
-
 utils.setEmptyStringsNull = function(object) {
     // Set empty strings to null
     // (since frontend might pass some of the integer fields as string, this allows unsetting those)

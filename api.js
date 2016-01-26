@@ -8,11 +8,11 @@ var db                  = require('./database');
 var log                 = require('./log');
 var utils               = require('./utils');
 
-var imageService            = require('./services/image');
 var tokenService            = require('./services/token');
 var roleService             = require('./services/role');
 
 var modelController         = require('./controllers/model');
+var imageController         = require('./controllers/image');
 var invitationController    = require('./controllers/invitation');
 var kpiController           = require('./controllers/kpi');
 
@@ -23,7 +23,6 @@ var upload = multer({ storage: storage });
 
 // Shortcuts
 var handleResult        = utils.handleResult;
-var generateUUID        = utils.generateUUID;
 var requiredRole        = roleService.requiredRoleMiddleware;
 var roles               = roleService.roles;
 
@@ -78,26 +77,7 @@ module.exports = function(app) {
 
     // Create (upload) image
     app.post('/api/v0/images', upload.single('imageFile'), function(req, res, next) {
-        var file = req.file;
-
-        var fileStorageId = generateUUID(); // will be used as a filename
-        var defaultTitle = utils.solveTitleFromFilename(file.originalname);
-
-        imageService.uploadImage(fileStorageId, file)
-        .then(uploadResult => modelController.create('Image', {
-            storageId: fileStorageId,
-            uploaderId: req.user.id,
-            created_at: new Date(),
-            hasThumbnailSize: uploadResult.thumb.uploaded,
-            hasDisplaySize: uploadResult.display.uploaded,
-
-            width: uploadResult.meta.width,
-            height: uploadResult.meta.height,
-
-            year: req.body.year,
-            month: req.body.month,
-            title: defaultTitle
-        }))
+        imageController.create(req.file, req.user, req.body)
         .then(dbResult => {
             kpiController.updateKpi();
             handleResult(dbResult.serialize(), res, next);

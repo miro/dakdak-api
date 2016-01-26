@@ -12,6 +12,7 @@ var gcs             = require('./gcs');
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/gif', 'image/png'];
 var service = {};
 
+
 service.uploadImage = function uploadImage(imageName, imageFile) {
 
     return Promise.resolve()
@@ -21,12 +22,15 @@ service.uploadImage = function uploadImage(imageName, imageFile) {
         thumb: resizeIntoWidth(rotatedImageBuffer, 320),
         displaySize: resizeIntoWidth(rotatedImageBuffer, 640)
     }))
-    .then(buffers => Promise.props({
-        original: gcs.uploadImageBuffer(imageName, imageFile.buffer),
-        thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
-        display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize),
-        meta: getImageInfos(imageFile.buffer)
-    }));
+    .then(buffers => {
+        log.debug('Image resizing and stuff OK, starting uploads');
+        Promise.props({
+            original: gcs.uploadImageBuffer(imageName, imageFile.buffer),
+            thumb: gcs.uploadImageBuffer(imageName + '--thumb', buffers.thumb),
+            display: gcs.uploadImageBuffer(imageName + '--display', buffers.displaySize),
+            meta: getImageInfos(imageFile.buffer)
+        });
+    });
 };
 
 
