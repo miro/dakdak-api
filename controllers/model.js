@@ -17,10 +17,13 @@ controller.getCount = function(modelType) {
     return db.models[modelType].count();
 };
 
-controller.getAll = function(modelType) {
+controller.getAll = function(modelType, whereObject) {
+    whereObject = whereObject || {};
+
     return new Promise((resolve, reject) => {
         new db
         .models[modelType]()
+        .where(whereObject)
         .query('orderBy', 'id', 'desc')
         .fetchAll()
         .then(items => resolve(items))
