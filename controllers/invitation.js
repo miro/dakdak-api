@@ -15,6 +15,10 @@ var userController      = require('../controllers/user');
 
 const INVITEES_USER_ROLE = roleService.roles.EDITOR;
 
+
+// The controller to-be-exported
+var controller = {};
+
 // "Cache"
 // save IDs of users who have failed the invitation-check in memory to make brute forcing
 // them a bit harder. Since the invitation codes aren't that "powerful", no extra care
@@ -40,12 +44,8 @@ cache.isAllowedToTry = function(user) {
 };
 
 
-// The controller to-be-exported
-var controller = {};
-
 controller.checkInvitation = function(code, user) {
     log.debug('Invitation challenge! user.id / code:', user.id, code);
-    console.log(user);
 
     return Promise.resolve()
         .then(() => cache.isAllowedToTry(user))
