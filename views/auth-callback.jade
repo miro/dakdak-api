@@ -1,10 +1,16 @@
 doctype html
 html(lang="en")
   head
-    title Dakdak Sisäänkirjautuminen
+    title Kajaaniskate sisäänkirjautuminen
+
+    link(href='https://fonts.googleapis.com/css?family=Titillium+Web' rel='stylesheet' type='text/css')
+    style.
+        body {
+            font-family: 'Titillium Web', sans-serif
+        }
+
 
     script(type='text/javascript').
-
       // Listen for events from the parent window
       window.addEventListener('message', function(event) {
         console.log('Event received from the parent window!', event);
@@ -18,3 +24,4 @@ html(lang="en")
 
   body
     h1 Sisäänkirjautuminen onnistui!
+    p Ohjaamme sut justiinsa takaisin, hetki...
