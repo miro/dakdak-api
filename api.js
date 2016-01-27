@@ -44,9 +44,11 @@ module.exports = function(app) {
         modelController.getAll('Spot')
         .then(result => handleResult(result, res, next));
     });
+
     app.get('/api/v0/images', function(req, res, next) {
-        modelController.getAll('Image')
-        .then(result => handleResult(result, res, next));
+        imageController.getAll(req.user)
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
     });
 
 
