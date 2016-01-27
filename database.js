@@ -158,10 +158,16 @@ models.Spot = bookshelf.Model.extend({
     tableName: 'spots'
 });
 models.User = bookshelf.Model.extend({
-    tableName: 'users'
+    tableName: 'users',
+    images: function() {
+        return this.hasMany(models.Image, 'uploaderId');
+    }
 });
 models.Organisation = bookshelf.Model.extend({
-    tableName: 'organisations'
+    tableName: 'organisations',
+    images: function() {
+        return this.hasMany(models.Image, 'organisationId').through(models.User, 'uploaderId');
+    }
 });
 
 var types = _.reduce(models, (result, item, key) => {
