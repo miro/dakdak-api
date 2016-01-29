@@ -76,7 +76,7 @@ service.isAuthorized = function checkUserHasRequiredUserLevel(user, requiredRole
     const requiredRoleIndex = _.findIndex(rolesConfig, { name: requiredRole });
 
     if (userRoleIndex >= 0 && requiredRoleIndex >= 0) {
-        return (userRoleIndex >= requiredRoleIndex) ? true : false;
+        return (userRoleIndex >= requiredRoleIndex);
     }
     else if (userRoleIndex < 0 && requiredRoleIndex < 0) {
         // user had unregistered/undefined role, but so was the required role -> return true
