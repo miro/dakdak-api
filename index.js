@@ -40,6 +40,7 @@ app.use(jwt({ secret: config.jwt.secret }).unless({
         '/auth/google', '/auth/google/callback',
         '/favicon.ico',
         '/api/v0/kpi',
+        '/api/v0/images/latest',
         '/api/v0/echo'
     ]
 }));

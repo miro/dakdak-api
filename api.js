@@ -51,6 +51,12 @@ module.exports = function(app) {
         .catch(error => next(error));
     });
 
+    app.get('/api/v0/images/latest', function(req, res, next) {
+        imageController.getLatest()
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
+    });
+
 
 
     // # Create-operations

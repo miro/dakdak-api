@@ -73,6 +73,17 @@ controller.getAll = function getAllImagesForUser(user) {
     }
 };
 
+controller.getLatest = function() {
+    const AMOUNT_OF_PICKS_TO_RETURN = 5;
+
+    return db.models.Image.forge()
+        .query('orderBy', 'id', 'desc')
+        .query('limit', AMOUNT_OF_PICKS_TO_RETURN)
+        .fetchAll({ withRelated: [
+            'rider', 'photographer', 'spot', 'organisation'
+        ]});
+}
+
 
 
 function solveTitleFromFilename(filename) {
