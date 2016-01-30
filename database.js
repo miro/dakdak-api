@@ -146,7 +146,22 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
 var models = {};
 
 models.Image = bookshelf.Model.extend({
-    tableName: 'images'
+    tableName: 'images',
+    uploader: function() {
+        return this.belongsTo(models.User, 'uploaderId');
+    },
+    rider: function() {
+        return this.belongsTo(models.Person, 'riderId');
+    },
+    photographer: function() {
+        return this.belongsTo(models.Person, 'photographerId');
+    },
+    spot: function() {
+        return this.belongsTo(models.Spot, 'spotId');
+    },
+    organisation: function() {
+        return this.belongsTo(models.Organisation, 'organisationId').through(models.User, 'uploaderId');
+    }
 });
 models.Invitation = bookshelf.Model.extend({
     tableName: 'invitations'
