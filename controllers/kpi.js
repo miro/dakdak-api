@@ -23,11 +23,13 @@ controller.getKpi = function() {
 controller.updateKpi = function() {
     return Promise.props({
         imageCount: modelController.getCount(db.types.Image),
+        spotCount: modelController.getCount(db.types.Spot),
         pixelCount: getPixelsUploaded()
     })
     .then(data => {
         kpi.imageCount = parseInt(data.imageCount, 10);
         kpi.pixelCount = parseInt(data.pixelCount, 10);
+        kpi.spotCount = parseInt(data.spotCount, 10);
 
         log.debug('KPI-data updated');
     });
