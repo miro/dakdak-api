@@ -74,13 +74,13 @@ controller.getAll = function getAllImagesForUser(user) {
 };
 
 controller.getLatest = function() {
-    const AMOUNT_OF_PICKS_TO_RETURN = 5;
+    const AMOUNT_OF_PICS_TO_RETURN = 10;
 
     return db.models.Image.forge()
         .query('orderBy', 'id', 'desc')
         .query('where', 'spotId', '<>', 0) // hack to achieve "not null"
         .query('where', 'riderId', '<>', 0)
-        .query('limit', AMOUNT_OF_PICKS_TO_RETURN)
+        .query('limit', AMOUNT_OF_PICS_TO_RETURN)
         .fetchAll({ withRelated: [
             'rider', 'photographer', 'spot', 'organisation'
         ]});
