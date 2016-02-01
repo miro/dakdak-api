@@ -8,7 +8,7 @@ var _                   = require('lodash');
 
 var db                  = require('../database');
 var log                 = require('../log');
-var generateUUID        = require('../utils').generateUUID;
+var utils               = require('../utils');
 
 var modelController     = require('../controllers/model');
 
@@ -19,7 +19,7 @@ var controller = {};
 
 
 controller.create = function uploadAndCreate(file, user, props) {
-    var fileStorageId = generateUUID(); // will be used as a filename
+    var fileStorageId = utils.generateUUID(); // will be used as a filename
     var defaultTitle = solveTitleFromFilename(file.originalname);
 
     return imageService.uploadImage(fileStorageId, file)
@@ -44,6 +44,7 @@ controller.create = function uploadAndCreate(file, user, props) {
 
 // This function defines what images does the user see
 controller.getAll = function getAllImagesForUser(user) {
+    // NOTE: this function should follow the same logic as userCanEditPhoto does
     var whereObject = {};
 
     if (roleService.isAuthorized(user, roleService.roles.ADMIN)) {
@@ -73,6 +74,29 @@ controller.getAll = function getAllImagesForUser(user) {
     }
 };
 
+controller.update = function(imageId, requestBody, user) {
+    // TODO: set updated_at
+    // Pick props which are allowed to update from what user has provided
+    var updatedProps = _.pick(requestBody,
+        'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
+        'year', 'month', 'day'
+    );
+    updatedProps = utils.setEmptyStringsNull(updatedProps);
+
+    return db.models.Image.forge({ id: imageId })
+        .fetch({ withRelated: ['organisation'] })
+        .then(imageModel => {
+            if (userCanEditPhoto(imageModel, user)) {
+                return imageModel.save(updatedProps, { patch: true});
+            }
+            else {
+                var error = new Error('Unauthorized Image editing');
+                error.status = 401;
+                return Promise.reject(error);
+            }
+        });
+};
+
 controller.getLatest = function() {
     const AMOUNT_OF_PICS_TO_RETURN = 10;
 
@@ -84,9 +108,28 @@ controller.getLatest = function() {
         .fetchAll({ withRelated: [
             'rider', 'photographer', 'spot', 'organisation'
         ]});
+};
+
+function userCanEditPhoto(imageModel, user) {
+    // NOTE: logic of this function should follow the same logic as getAll() does
+    if (imageModel.get('uploaderId') === user.id) {
+        log.debug('User is editing their own photo');
+        return true;
+    }
+    else if (imageModel.related('organisation').get('id') === user.organisationId) {
+        log.debug('User is editing photo from their own organisation');
+        return true;
+    }
+    else if (roleService.isAuthorized(user, roleService.roles.ADMIN)) {
+        log.debug('Admin is editing photo');
+        return true;
+    }
+    else {
+        log.error('User tried unauthorized photo editing!');
+        return false;
+    }
+
 }
-
-
 
 function solveTitleFromFilename(filename) {
     var nameParts = filename.split('.');

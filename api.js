@@ -1,3 +1,6 @@
+// TODO: error handling in here requires refactoring.
+// does those .error blocks even work properly?! =DD
+
 // # Imports
 var Promise = require('bluebird');
 var _       = require('lodash');
@@ -121,17 +124,10 @@ module.exports = function(app) {
     });
 
     // Update image
-    // TODO: for normal users allow updating only images uploaded by user or the user organisation
-    app.put('/api/v0/images/:id', requiredRole(roles.EDITOR), function(req, res, next) {
-        var props = _.pick(req.body,
-            'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
-            'year', 'month', 'day'
-        );
-        props = utils.setEmptyStringsNull(props);
-
-        modelController.update('Image', req.params.id, props)
+    app.put('/api/v0/images/:id', function(req, res, next) {
+        imageController.update(req.params.id, req.body, req.user)
         .then(newProps => handleResult(newProps, res, next))
-        .error(error => next(new Error(error)));
+        .catch(error => next(error));
     });
 
 
