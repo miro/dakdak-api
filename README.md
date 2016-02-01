@@ -1,4 +1,4 @@
-dakdak-backend
+dakdak-backend - KAJAANISKATE.NET backend
 ==============
 
 Backend for [KAJAANISKATE.NET](http://kajaaniskate.net).  See also [kadkad-mgmt](https://github.com/miro/kadkad-mgmt) which is the current frontend of that website. Hosted on Heroku.
