@@ -1,193 +1,136 @@
 // # Imports
-var aws     = require('aws-sdk');
-var jwt     = require('express-jwt');
 var Promise = require('bluebird');
 var _       = require('lodash');
+var multer  = require('multer');
 
-var config = require('./configurator.js');
-var db = require('./database.js');
+var config              = require('./configurator');
+var db                  = require('./database');
+var log                 = require('./log');
+var utils               = require('./utils');
 
-aws.config.update({
-    accessKeyId: config.s3Config.key,
-    secretAccessKey: config.s3Config.secret,
-    signatureVersion: 'v4',
-    region: 'eu-central-1' // required by the v4 signature
-});
+var tokenService            = require('./services/token');
+var roleService             = require('./services/role');
 
-
-
-
-// ### Utility functions
-var _generateUUID = (function() {
-    // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-       .toString(16)
-       .substring(1);
-    }
-    return function() {
-        return s4() + s4() + s4() + s4();
-    };
-})();
-
-var _handleResult = function(result, res, next) {
-    if (result) {
-        try {
-            res.send(result.toJSON());
-        }
-        catch (error) {
-            return next(new Error(error));
-        }
-    }
-    else {
-        res.sendStatus(404);
-    }
-};
-
-var _deleteItem = function(type, id) {
-    return new Promise(function(resolve, reject) {
-
-        new db.models[type]({ id: id })
-        .fetch({ require: true })
-        .then(function(model) {
-            if (model) {
-                model.destroy()
-                .then(function destroyOk() {
-                    resolve();
-                });
-            }
-            else {
-                reject('Model not found');
-            }
-        })
-        .catch(function(error) {
-            console.log('Catch on _deleteItem Pokemon block', error);
-            reject(error);
-        });
-    });
-};
+var modelController         = require('./controllers/model');
+var imageController         = require('./controllers/image');
+var invitationController    = require('./controllers/invitation');
+var kpiController           = require('./controllers/kpi');
 
 
-var _updateItem = function(type, id, newAttrs, res, next) {
-    return new Promise(function(resolve, reject) {
-        new db.models[type]({ id: id })
-        .fetch({ require: true })
-        .then(function (model) {
-            model.save(newAttrs, { patch: true })
-            .then(function saveOk(newModel) {
-                resolve(newModel);
-            })
-            .error(function saveNotOk(error) {
-                reject(error);
-            });
-        });
-    });
-};
+// multer init
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
+
+// Shortcuts
+var handleResult        = utils.handleResult;
+var requiredRole        = roleService.requiredRoleMiddleware;
+var roles               = roleService.roles;
 
 
 module.exports = function(app) {
+    // # "Key Performance Indicator"
+    // requires no authentication
+    app.get('/api/v0/kpi', function(req, res, next) {
+        handleResult(kpiController.getKpi(), res, next);
+    });
+
     // # Basic bulk fetches
-    app.get('/api/v0/person', function(req, res, next) {
-        new db.models.Person().fetchAll()
-        .then(function(result) { _handleResult(result, res, next); });
-    });
-    app.get('/api/v0/spot', function(req, res, next) {
-        new db.models.Spot().fetchAll()
-        .then(function(result) { _handleResult(result, res, next); });
-    });
-    app.get('/api/v0/image', function(req, res, next) {
-        new db.models.Image().fetchAll()
-        .then(function(result) { _handleResult(result, res, next); });
-    });
-
-
-    // # Get single entity
     //
-    // Image
-    app.get('/api/v0/image/:id', function(req, res, next) {
-        new db.models.Image()
-        .where({ id: req.params.id })
-        .fetch()
-        .then(function(result) { _handleResult(result, res, next); });
+    app.get('/api/v0/persons', function(req, res, next) {
+        modelController.getAll('Person')
+        .then(result => handleResult(result, res, next));
+    });
+    app.get('/api/v0/spots', function(req, res, next) {
+        modelController.getAll('Spot')
+        .then(result => handleResult(result, res, next));
+    });
+
+    app.get('/api/v0/images', function(req, res, next) {
+        imageController.getAll(req.user)
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
+    });
+
+    app.get('/api/v0/images/latest', function(req, res, next) {
+        imageController.getLatest()
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
     });
 
 
+
+    // # Create-operations
+    //
     // Create person
-    app.post('/api/v0/person', function(req, res, next) {
-        var person = new db.models.Person({
+    app.post('/api/v0/persons', requiredRole(roles.EDITOR), function(req, res, next) {
+        modelController.create('Person', {
             fullName: req.body.fullName,
             displayName: req.body.displayName
-        });
-        person.save()
-        .then(function saveOk(newPerson) {
-            _handleResult(newPerson, res, next);
-        });
-    });
-    // Create spot
-    app.post('/api/v0/spot', function(req, res, next) {
-        var spot = new db.models.Spot({
-            name: req.body.name
-        });
-        spot.save()
-        .then(function saveOk(newSpot) {
-            _handleResult(newSpot, res, next);
-        });
-    });
-    // Create image
-    app.post('/api/v0/image', function(req, res, next) {
-        new db.models.Image({ s3id: req.body.s3id })
-        .save()
-        .then(function saveOk(newImg) {
-            _handleResult(newImg, res, next);
-        });
-    });
-
-
-
-    // Update person
-    app.put('/api/v0/person/:id', function(req, res, next) {
-        console.log(req.body);
-
-        _updateItem('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
-        .then(function saveOk(model) {
-            _handleResult(model, res, next);
         })
-        .error(function saveNotOk(error) {
-            return next(new Error(error));
+        .then(function saveOk(newPerson) {
+            handleResult(newPerson, res, next);
         });
     });
-    // Update spot
-    app.put('/api/v0/spot/:id', function(req, res, next) {
-        var attrObj = {
+
+    // Create spot
+    app.post('/api/v0/spots', requiredRole(roles.EDITOR), function(req, res, next) {
+        modelController.create('Spot', {
             name: req.body.name,
-            location_search_string: req.body.location_search_string,
+            description: req.body.description
+        })
+        .then(function saveOk(newSpot) {
+            handleResult(newSpot, res, next);
+        });
+    });
+
+    // Create (upload) image
+    app.post('/api/v0/images', upload.single('imageFile'), function(req, res, next) {
+        imageController.create(req.file, req.user, req.body)
+        .then(dbResult => {
+            kpiController.updateKpi();
+            handleResult(dbResult.serialize(), res, next);
+        })
+        .catch(error => {
+            log.error('Error on image creation', error);
+            next(error);
+        });
+    });
+
+
+
+    // # Update-operations
+    //
+    // Update person
+    app.put('/api/v0/persons/:id', requiredRole(roles.EDITOR), function(req, res, next) {
+        modelController.update('Person', req.params.id, _.pick(req.body, 'displayName', 'fullName'))
+        .then(newProps => handleResult(newProps, res, next))
+        .error(error => next(new Error(error)));
+    });
+
+    // Update spot
+    app.put('/api/v0/spots/:id', requiredRole(roles.EDITOR), function(req, res, next) {
+        modelController.update('Spot', req.params.id, {
+            name: req.body.name,
+            description: req.body.description,
             latitude: parseFloat(req.body.latitude) || 0.0,
             longitude: parseFloat(req.body.longitude) ||  0.0
-        };
-        console.log(attrObj);
-
-        _updateItem('Spot', req.params.id, attrObj)
-        .then(function saveOk(model) {
-            _handleResult(model, res, next);
         })
-        .error(function saveNotOk(error) {
-            return next(new Error(error));
-        });
+        .then(newProps => handleResult(newProps, res, next))
+        .error(error => next(new Error(error)));
     });
+
     // Update image
-    app.put('/api/v0/image/:id', function(req, res, next) {
-
-        var attrObj = _.pick(req.body, 
-            'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published'
+    // TODO: for normal users allow updating only images uploaded by user or the user organisation
+    app.put('/api/v0/images/:id', requiredRole(roles.EDITOR), function(req, res, next) {
+        var props = _.pick(req.body,
+            'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
+            'year', 'month', 'day'
         );
+        props = utils.setEmptyStringsNull(props);
 
-        _updateItem('Image', req.params.id, attrObj)
-        .then(function saveOk(model) {
-            _handleResult(model, res, next);
-        })
-        .error(function saveNotOk(error) {
-            return next(new Error(error));
-        });
+        modelController.update('Image', req.params.id, props)
+        .then(newProps => handleResult(newProps, res, next))
+        .error(error => next(new Error(error)));
     });
 
 
@@ -195,66 +138,38 @@ module.exports = function(app) {
     // # Delete-operations
     //
     // Delete person
-    app.delete('/api/v0/person/:id', function(req, res, next) {
-        _deleteItem('Person', req.params.id)
-        .then(function deleteOk() {
-            res.sendStatus(200);
-        })
-        .error(function deleteNotOk(error) {
-            return next(new Error(error));
-        });
+    app.delete('/api/v0/persons/:id', requiredRole(roles.ADMIN), function(req, res, next) {
+        modelController.delete('Person', req.params.id)
+        .then(() => res.sendStatus(200))
+        .error(error => next(new Error(error)));
     });
 
     // Delete spot
-    app.delete('/api/v0/spot/:id', function(req, res, next) {
-        _deleteItem('Spot', req.params.id)
-        .then(function deleteOk() {
-            res.sendStatus(200);
-        })
-        .error(function deleteNotOk(error) {
-            return next(new Error(error));
-        });
+    app.delete('/api/v0/spots/:id', requiredRole(roles.ADMIN), function(req, res, next) {
+        modelController.delete('Spot', req.params.id)
+        .then(() => res.sendStatus(200))
+        .error(error => next(new Error(error)));
     });
 
     // Delete image
-    app.delete('/api/v0/image/:id', function(req, res, next) {
-        _deleteItem('Image', req.params.id)
-        .then(function deleteOk() {
-            res.sendStatus(200);
-        })
-        .error(function deleteNotOk(error) {
-            return next(new Error(error));
-        });
+    app.delete('/api/v0/images/:id', requiredRole(roles.ADMIN), function(req, res, next) {
+        modelController.delete('Image', req.params.id)
+        .then(() => res.sendStatus(200))
+        .error(error => next(new Error(error)));
     });
 
 
 
-    // # S3
-    app.get('/api/v0/s3link', function(req, res, next) {
-        var objectUUID = _generateUUID();
-
-        var s3 = new aws.S3(); 
-        var s3_params = { 
-            Bucket: config.s3Config.bucket, 
-            Key: objectUUID,
-            Expires: 60, 
-            ContentType: req.query.s3_object_type, 
-            ACL: 'public-read'
-        };
-
-
-        s3.getSignedUrl('putObject', s3_params, function(err, data) {
-            if (err) return next(new Error(err));
-            else { 
-                var return_data = {
-                    signed_request: data,
-                    url: 'https://'+ config.s3Config.bucket +'.s3.amazonaws.com/' + objectUUID,
-                    s3id: objectUUID
-                };
-                res.write(JSON.stringify(return_data));
-                res.end();
-            } 
-        });
+    // # Invitation codes
+    //
+    // Check invitation
+    app.post('/api/v0/invitation', function(req, res, next) {
+        invitationController.checkInvitation(req.body.invitationCode, req.user)
+        .then((updatedUserModel) => handleResult({
+                userProfile: updatedUserModel.serialize(),
+                newToken: tokenService.getToken(updatedUserModel)
+        }, res, next))
+        .catch(error => next(error));
     });
 
 
@@ -263,7 +178,6 @@ module.exports = function(app) {
         console.log(req.body);
         console.log(req.params);
 
-        _handleResult({body: req.body, params: req.params}, res, next);
+        handleResult({ body: req.body, params: req.params }, res, next);
     });
-
-}
+};
