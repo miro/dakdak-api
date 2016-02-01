@@ -75,7 +75,6 @@ controller.getAll = function getAllImagesForUser(user) {
 };
 
 controller.update = function(imageId, requestBody, user) {
-    // TODO: set updated_at
     // Pick props which are allowed to update from what user has provided
     var updatedProps = _.pick(requestBody,
         'title', 'trickName', 'description', 'date', 'riderId', 'photographerId', 'spotId', 'published',
@@ -102,9 +101,9 @@ controller.getLatest = function() {
     const AMOUNT_OF_PICS_TO_RETURN = 10;
 
     return db.models.Image.forge()
-        .query('orderBy', 'id', 'desc')
         .query('where', 'spotId', '<>', 0) // hack to achieve "not null"
         .query('where', 'riderId', '<>', 0)
+        .query('orderBy', 'updated_at', 'desc')
         .query('limit', AMOUNT_OF_PICS_TO_RETURN)
         .fetchAll({ withRelated: [
             'rider', 'photographer', 'spot', 'organisation'
