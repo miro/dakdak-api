@@ -82,6 +82,7 @@ controller.update = function(imageId, requestBody, user) {
         'year', 'month', 'day'
     );
     updatedProps = utils.setEmptyStringsNull(updatedProps);
+    updatedProps.updated_at = new Date();
 
     return db.models.Image.forge({ id: imageId })
         .fetch({ withRelated: ['organisation'] })
