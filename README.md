@@ -1,7 +1,7 @@
-dakdak-backend
+dakdak-backend - KAJAANISKATE.NET backend
 ==============
 
-Backend for "Dakdak image gallery". See also [Dakdak Management App](https://github.com/miro/dakdak-mgmt). Aimed to be hosted on Heroku.
+Backend for [KAJAANISKATE.NET](http://kajaaniskate.net).  See also [kadkad-mgmt](https://github.com/miro/kadkad-mgmt) which is the current frontend of that website. Hosted on Heroku.
 
 
 ## Requirements
