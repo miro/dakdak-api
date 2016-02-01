@@ -47,6 +47,9 @@ cache.isAllowedToTry = function(user) {
 controller.checkInvitation = function(code, user) {
     log.debug('Invitation challenge! user.id / code:', user.id, code);
 
+    // Change code to lowercase so the case won't matter
+    code = code.toLowerCase();
+
     return Promise.resolve()
         .then(() => cache.isAllowedToTry(user))
         .then(() => Promise.props({
