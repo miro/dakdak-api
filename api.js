@@ -79,6 +79,7 @@ module.exports = function(app) {
             description: req.body.description
         })
         .then(function saveOk(newSpot) {
+            kpiController.updateKpi();
             handleResult(newSpot, res, next);
         });
     });
