@@ -1,6 +1,6 @@
 {
   "name": "dakdak-backend",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Backend for the Dakdak service",
   "main": "index.js",
   "scripts": {
