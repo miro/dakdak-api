@@ -103,7 +103,7 @@ controller.getLatest = function() {
     return db.models.Image.forge()
         .query('where', 'spotId', '<>', 0) // hack to achieve "not null"
         .query('where', 'riderId', '<>', 0)
-        .query('orderBy', 'updated_at')
+        .query('orderBy', 'updated_at', 'desc')
         .query('limit', AMOUNT_OF_PICS_TO_RETURN)
         .fetchAll({ withRelated: [
             'rider', 'photographer', 'spot', 'organisation'
