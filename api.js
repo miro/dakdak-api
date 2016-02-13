@@ -17,6 +17,7 @@ var roleService             = require('./services/role');
 var modelController         = require('./controllers/model');
 var imageController         = require('./controllers/image');
 var invitationController    = require('./controllers/invitation');
+var spotController          = require('./controllers/spot');
 var kpiController           = require('./controllers/kpi');
 
 
@@ -31,11 +32,26 @@ var roles               = roleService.roles;
 
 
 module.exports = function(app) {
-    // # "Key Performance Indicator"
-    // requires no authentication
+    // # Non-authentitated routes
+    // ## "Key Performance Indicator"
     app.get('/api/v0/kpi', function(req, res, next) {
         handleResult(kpiController.getKpi(), res, next);
     });
+
+    // ## Latest images
+    app.get('/api/v0/images/latest', function(req, res, next) {
+        imageController.getLatest()
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
+    });
+
+    // ## Spot locations
+    app.get('/api/v0/spots/locations', function(req, res, next) {
+        spotController.getLocations()
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
+    });
+
 
     // # Basic bulk fetches
     //
@@ -50,12 +66,6 @@ module.exports = function(app) {
 
     app.get('/api/v0/images', function(req, res, next) {
         imageController.getAll(req.user)
-        .then(result => handleResult(result, res, next))
-        .catch(error => next(error));
-    });
-
-    app.get('/api/v0/images/latest', function(req, res, next) {
-        imageController.getLatest()
         .then(result => handleResult(result, res, next))
         .catch(error => next(error));
     });
