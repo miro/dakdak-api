@@ -2,12 +2,8 @@
 //      everything related to Spots
 //
 'use strict';
-
-var Promise             = require('bluebird');
 var _                   = require('lodash');
-
 var db                  = require('../database');
-
 
 // The controller to-be-exported
 var controller = {};
