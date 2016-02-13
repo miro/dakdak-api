@@ -7,9 +7,6 @@ var Promise             = require('bluebird');
 var _                   = require('lodash');
 
 var db                  = require('../database');
-var log                 = require('../log');
-
-var modelController     = require('../controllers/model');
 
 
 // The controller to-be-exported
@@ -23,7 +20,7 @@ controller.getLocations = function() {
         .then(spotsCollection => {
             return _.map(spotsCollection.models, spot => {
                 // This is kind of stupid but I didn't find out how to pass SELECT via Bookshelf
-                return _.pick(spot.serialize(), ['id', 'name', 'latitude', 'longitude'])
+                return _.pick(spot.serialize(), ['id', 'name', 'latitude', 'longitude']);
             });
         });
 };
