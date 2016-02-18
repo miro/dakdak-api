@@ -1,41 +1,40 @@
 'use strict';
 var expect              = require('chai').expect;
 
+var createUser          = require('./test-utils').createUser;
+
 const roleService       = require('../services/role');
 const roles = roleService.roles;
 
 
 describe('roleService', () => {
-    // TODO: FIX THESE TO WORK WITH USER-BOOKSHELF-MODELS instead of PLAIN OBJECTS
-    // :(
-
-
     // # accessLevel -> role tests
     //
     it('sets user with undefined level to UNREGISTERED', () => {
-        let user = roleService.solveRole({ name: 'foo' });
-        expect(user.role).to.equal(roles.UNREGISTERED);
+        let user = createUser(undefined);
+        roleService.solveRole(user);
+        expect(user.get('role')).to.equal(roles.UNREGISTERED);
     });
 
 
     it('sets user with level 0 to USER', () => {
         let user = createUser(0);
         roleService.solveRole(user);
-        expect(user.role).to.equal(roles.USER);
+        expect(user.get('role')).to.equal(roles.USER);
     });
 
 
     it('sets user with level 10 to EDITOR', () => {
         let user = createUser(10);
         roleService.solveRole(user);
-        expect(user.role).to.equal(roles.EDITOR);
+        expect(user.get('role')).to.equal(roles.EDITOR);
     });
 
 
     it('sets user with level 100 to ADMIN', () => {
         let user = createUser(100);
         roleService.solveRole(user);
-        expect(user.role).to.equal(roles.ADMIN);
+        expect(user.get('role')).to.equal(roles.ADMIN);
     });
 
     it('user should not have accessLevel after the role is solved', () => {
@@ -84,10 +83,3 @@ describe('roleService', () => {
     });
 });
 
-
-function createUser(accessLevel) {
-    return {
-        name: 'foo',
-        accessLevel
-    };
-}
