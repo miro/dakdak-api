@@ -140,6 +140,42 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
     }
 });
 
+// Rating
+bookshelf.knex.schema.hasTable('ratings').then(function(exists) {
+    if (!exists) {
+        return bookshelf.knex.schema.createTable('ratings', function(t) {
+            t.increments('id').primary();
+            t.timestamps();
+
+            // Who is making this rating
+            t.integer('raterId')
+                .unsigned()
+                .references('id').inTable('users')
+                .onDelete('SET NULL');
+
+            // First image and second image makes the "pair" which is rated on this
+            // rating entry
+            // TODO: does Postgres have any magic for this?
+            t.integer('firstImageId')
+                .unsigned()
+                .references('id').inTable('images')
+                .onDelete('CASCADE');
+            t.integer('secondImageId')
+                .unsigned()
+                .references('id').inTable('images')
+                .onDelete('CASCADE');
+
+            t.unique(['raterId', 'firstImageId', 'secondImageId']);
+
+            // Id for the "winner" of this rating entry
+            t.integer('betterImageId')
+                .unsigned()
+                .references('id').inTable('persons')
+                .onDelete('CASCADE');
+        });
+    }
+});
+
 
 // # Define models
 // TODO: move to schema.js?
@@ -184,6 +220,18 @@ models.Organisation = bookshelf.Model.extend({
         return this.hasMany(models.Image, 'organisationId').through(models.User, 'uploaderId');
     }
 });
+models.Rating = bookshelf.Model.extend({
+    tableName: 'ratings',
+    firstImage: function() {
+        return this.belongsTo(models.Image, 'firstImageId');
+    },
+    secondImage: function() {
+        return this.belongsTo(models.Image, 'secondImageId');
+    },
+    betterImage: function() {
+        return this.belongsTo(models.Image, 'betterImageId');
+    }
+})
 
 var types = _.reduce(models, (result, item, key) => {
     result[key] = key;
@@ -195,6 +243,4 @@ module.exports = {
     models: models,
     types: types,
     knex: bookshelf.knex
-}
-
-
+};
