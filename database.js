@@ -113,6 +113,8 @@ bookshelf.knex.schema.hasTable('images').then(function(exists) {
             t.integer('month');
             t.integer('day');
 
+            t.integer('rating');
+
             t.boolean('published').defaultTo(false);
             t.boolean('hasThumbnailSize').defaultTo(false);
             t.boolean('hasDisplaySize').defaultTo(false);
