@@ -15,9 +15,12 @@ var modelController     = require('../controllers/model');
 var roleService         = require('../services/role');
 var imageService        = require('../services/image');
 
-var controller = {};
 
+var controller = {}; // Controller to-be-exported
+controller.insecure = {}; // functions of the controller which don't implement any access checks
 
+// # Public API (secure functions) -------------------------------------------------
+//
 controller.create = function uploadAndCreate(file, user, props) {
     var fileStorageId = utils.generateUUID(); // will be used as a filename
     var defaultTitle = solveTitleFromFilename(file.originalname);
@@ -110,6 +113,18 @@ controller.getLatest = function() {
         ]});
 };
 
+
+// # Public API (insecure functions) -------------------------------------------------
+//
+controller.insecure.getPublicImages = function() {
+    return db.models.Image.forge()
+        // TODO public
+        .fetchAll();
+}
+
+
+// # Private functions ---------------------------------------------------------------
+//
 function userCanEditPhoto(imageModel, user) {
     // NOTE: logic of this function should follow the same logic as getAll() does
     if (imageModel.get('uploaderId') === user.id) {
