@@ -4,10 +4,11 @@ var Model               = require('../database').models.User;
 
 var utils = {};
 
-utils.createUser = function createUser(accessLevel) {
+utils.createUser = function createUser(accessLevel, id) {
     return new Model({
         name: 'foo',
-        accessLevel
+        accessLevel,
+        id: id ? id : 0
     });
 };
 

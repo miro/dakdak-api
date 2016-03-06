@@ -6,6 +6,10 @@
 //
 //      These Rating-informations are used to rank all the images in the system
 //      via ELO-implementation.
+//
+//  Cheers to Kimmo Brunfeldt - this solution is heavily inspired by his example:
+//  https://github.com/kimmobrunfeldt/dakdak-problem/blob/master/get-pairs.js
+
 
 
 // The Elo rating system is a method for calculating the relative skill levels of players in
@@ -26,19 +30,21 @@
 'use strict';
 
 var _                   = require('lodash');
+var Promise             = require('bluebird');
+var G                   = require('generatorics');
 
 var db                  = require('../database');
 var imageController     = require('./image');
 var log                 = require('../log');
 
 var knex                = db.knex;
-var Rating              = db.models.Rating;
-var Image               = db.models.Image;
+var RatingModel         = db.models.Rating;
+var ImageModel          = db.models.Image;
 
 const IMAGES_TABLE      = 'images';
 const RATINGS_TABLE     = 'ratings';
 
-const RATING_LIST_LENGTH = 10;
+const NEW_RATING_LIST_LENGTH = 10;
 var controller = {};
 
 
@@ -46,55 +52,136 @@ var controller = {};
 // Creates list of new "rating pairs" to the user.
 // If user has "unfilled rating pairs", they are returned instead
 controller.getRatingList = function getRatingListForUser(user) {
-    // db.knex.raw('SELECT ID FROM images ORDER BY random() LIMIT 10;')
-    //     .then(result => console.log(result.rows));
 
-    knex.select('id').from(IMAGES_TABLE)
-        .orderByRaw('random()')
-        .limit(RATING_LIST_LENGTH * 10)
-        .then(result => getRatingPairs(result));
+    return RatingModel.forge()
+    .query(function(qb) {
+        qb.whereNull('betterImageId');
+        qb.andWhere('raterId', '=', user.get('id'));
+    })
+    .fetchAll()
+    .then(existingUnfilledRatings => {
+        if (existingUnfilledRatings.length > 0) {
+            // user has unfilled ratings -> return them
+            log.debug('Rating pairs found', existingUnfilledRatings.length)
+            return Promise.resolve(existingUnfilledRatings.serialize());
+        } else {
+            // user has no ratings to fill -> generate new ones to him
+            getNewRatingPairs(existingUnfilledRatings).then(newPairs => {
+                var createOperations = _.reduce(newPairs, (result, ratingPair) => {
+                    result.push(controller.create(user, ratingPair))
+                    return result;
+                }, []);
 
+                return Promise.all(createOperations).then(models => {
+                    return Promise.resolve(_.map(models, model => model.serialize()));
+                });
+            });
+        }
+    });
 };
 
-controller.rate = function saveRating(user, ratingId, betterImageId) {
 
-    return db.models.Rating
+controller.create = function createRating(user, ratingPair) {
+    return RatingModel
+        .forge({
+            created_at: new Date(),
+            raterId: user.get('id'),
+            firstImageId: ratingPair.firstImageId,
+            secondImageId: ratingPair.secondImageId
+        })
+        .save();
+};
+
+
+controller.rate = function saveRating(user, ratingId, betterImageId) {
+    return RatingModel
         .forge({ id: ratingId, raterId: user.get('id') })
         .fetch()
         .then(ratingModel => ratingModel.save({ betterImageId }));
 };
 
-// controller.getLocations = function() {
-//     return db.models.Spot.forge()
-//         .query('where', 'latitude', '<>', 0) // hack to achieve "not null"
-//         // .query('limit', AMOUNT_OF_PICS_TO_RETURN)
-//         .fetchAll()
-//         .then(spotsCollection => {
-//             return _.map(spotsCollection.models, spot => {
-//                 // This is kind of stupid but I didn't find out how to pass SELECT via Bookshelf
-//                 return _.pick(spot.serialize(), ['id', 'name', 'latitude', 'longitude']);
-//             });
-//         });
-// };
 
+function getNewRatingPairs(userRatings) {
+    return imageController.insecure.getPublicImages()
+    .then(publicImages => {
 
-function getIncompleteRatings(user) {
-    return Rating.forge()
-        .query('where', 'raterId', user.get('id'))
+        var imageIds = _.map(publicImages.models, model => model.get('id'));
+        var ratings = _.map(userRatings.models, model => ({
+            firstImageId: model.get('firstImageId'),
+            secondImageId: model.get('secondImageId')
+        }));
+
+        // Get list of unrated pairs
+        var unratedPairs = [];
+        for (var pair of generatePairs(ratings, imageIds)) {
+            unratedPairs.push(_.clone(pair));
+        }
+
+        const pairItems = _.chain(unratedPairs)
+            .groupBy(item => item[0])
+            .map(idGroup => idGroup[_.random(0, idGroup.length - 1)])
+            .splice(NEW_RATING_LIST_LENGTH)
+            .map(pair => ({ firstImageId: pair[0], secondImageId: pair[1] }))
+            .value();
+
+        return Promise.resolve(pairItems);
+    });
 }
 
-function getRatingPairs(imageIdRows) {
-    if (imageIdRows.length < RATING_LIST_LENGTH * 2) {
-        return new Promise.OperationalError('Not enough image IDs for creating new rating pairs');
+
+// Get N image pairs which user has not rated
+function* generatePairs(userRatings, images) {
+    for (var tuple of G.combination(images, 2)) {
+        // Get only pairs which are not yet rated
+        if (!hasUserRated(userRatings, tuple[0], tuple[1])) {
+            // Get only pairs where first id is smaller than the second
+            if (tuple[0] < tuple[1]) {
+                yield tuple;
+            }
+        }
     }
-
-    const keke = _.chain(imageIdRows)
-        .groupBy((row, index) => row.id % 2 === 0 ? '')
-        .value()
-
-
-    console.log('keke', keke);
-    return keke;
 }
+
+function hasUserRated(userRatings, firstImageId, secondImageId) {
+    var index = _.findIndex(userRatings, r => {
+        // Test both ways - just to make it sure
+        const orderA = firstImageId === r.firstImageId && secondImageId === r.secondImageId;
+        const orderB = firstImageId === r.secondImageId && secondImageId === r.firstImageId;
+        return orderA || orderB;
+    });
+
+  return index !== -1;
+}
+
+
+// function getRatingPairs(imageIdRows) {
+//     const pairs = _.chain(imageIdRows)
+//         .map(item => item.id)
+//         .value();
+
+//     return Promise.resolve(pairs);
+// }
+
+// function getRatingPairs_old(imageIdRows) {
+//     if (imageIdRows.length < NEW_RATING_LIST_LENGTH * 2) {
+//         return new Promise.OperationalError('Not enough image IDs for creating new rating pairs');
+//     }
+
+//     const pairs = _.chain(imageIdRows)
+//         // .groupBy((row, index) => index % 2 === 0 ? 'even' : 'odd')
+//         .map(item => item.id)
+//         .chunk(2)
+//         .map(tuple => {
+//             return {
+//                 firstImageId: tuple[0] < tuple[1] ? tuple[0] : tuple[1],
+//                 secondImageId: tuple[0] < tuple[1] ? tuple[1] : tuple[0]
+//             };
+//         })
+//         .value();
+
+
+//     console.log('pairs', pairs);
+//     return Promise.resolve(pairs);
+// }
 
 module.exports = controller;

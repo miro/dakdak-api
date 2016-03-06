@@ -8,7 +8,8 @@ const ctrl       = require('../controllers/rating');
 
 describe('ratingController', () => {
     it('handles things', () => {
-        ctrl.getRatingList({});
+        let userModel = createUser(500, 1);
+        ctrl.getRatingList(userModel).then(list => console.log(list));
 
         // expect(user.role).to.equal(roles.UNREGISTERED);
     });
