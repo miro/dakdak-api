@@ -28,6 +28,7 @@
     "express": "4.13.3",
     "express-jwt": "3.3.0",
     "gcloud": "^0.26.1",
+    "generatorics": "^1.0.4",
     "gm": "^1.21.1",
     "jade": "^1.11.0",
     "jsonwebtoken": "^5.5.0",
