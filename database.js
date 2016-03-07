@@ -172,8 +172,8 @@ bookshelf.knex.schema.hasTable('ratings').then(function(exists) {
             // Id for the "winner" of this rating entry
             t.integer('betterImageId')
                 .unsigned()
-                .references('id').inTable('persons')
                 .onDelete('CASCADE');
+                .references('id').inTable('images')
         });
     }
 });
