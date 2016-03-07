@@ -114,14 +114,15 @@ function getNewRatingPairs(userRatings) {
         // Get list of unrated pairs
         var unratedPairs = [];
         for (var pair of generatePairs(ratings, imageIds)) {
-            unratedPairs.push(_.clone(pair));
+            const firstImageId = pair[0] < pair[1] ? pair[0] : pair[1];
+            const secondImageId = pair[0] < pair[1] ? pair[1] : pair[0];
+            unratedPairs.push({ firstImageId, secondImageId });
         }
 
         const pairItems = _.chain(unratedPairs)
-            .groupBy(item => item[0])
+            .groupBy(item => item.firstImageId)
             .map(idGroup => idGroup[_.random(0, idGroup.length - 1)])
-            .splice(NEW_RATING_LIST_LENGTH)
-            .map(pair => ({ firstImageId: pair[0], secondImageId: pair[1] }))
+            .splice(0, NEW_RATING_LIST_LENGTH)
             .value();
 
         return Promise.resolve(pairItems);
