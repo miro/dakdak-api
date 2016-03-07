@@ -53,17 +53,12 @@ var controller = {};
 // If user has "unfilled rating pairs", they are returned instead
 controller.getRatingList = function getRatingListForUser(user) {
 
-    return RatingModel.forge()
-    .query(function(qb) {
-        qb.whereNull('betterImageId');
-        qb.andWhere('raterId', '=', user.get('id'));
-    })
-    .fetchAll()
+    return fetchUnrated(user)
     .then(existingUnfilledRatings => {
         if (existingUnfilledRatings.length > 0) {
             // user has unfilled ratings -> return them
             log.debug('Rating pairs found', existingUnfilledRatings.length)
-            return Promise.resolve(existingUnfilledRatings.serialize());
+            return Promise.resolve(existingUnfilledRatings);
         } else {
             // user has no ratings to fill -> generate new ones to him
             getNewRatingPairs(existingUnfilledRatings).then(newPairs => {
@@ -72,8 +67,9 @@ controller.getRatingList = function getRatingListForUser(user) {
                     return result;
                 }, []);
 
-                return Promise.all(createOperations).then(models => {
-                    return Promise.resolve(_.map(models, model => model.serialize()));
+                return Promise.all(createOperations)
+                .then(models => {
+                    return fetchUnrated(user);
                 });
             });
         }
@@ -151,6 +147,17 @@ function hasUserRated(userRatings, firstImageId, secondImageId) {
   return index !== -1;
 }
 
+function fetchUnrated(user) {
+    return RatingModel.forge()
+    .query(function(qb) {
+        qb.whereNull('betterImageId');
+        qb.andWhere('raterId', '=', user.get('id'));
+    })
+    .fetchAll({
+        withRelated: ['firstImage', 'secondImage']
+    })
+    .then(models => models.serialize());
+}
 
 
 module.exports = controller;
