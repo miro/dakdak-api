@@ -51,6 +51,8 @@ var controller = {};
 
 // Creates list of new "rating pairs" to the user.
 // If user has "unfilled rating pairs", they are returned instead
+// TODO this fails the tests when there is generating of the pairs take place ->
+// do we need transaction in here?
 controller.getRatingList = function getRatingListForUser(user) {
 
     return fetchUnrated(user)
@@ -63,7 +65,7 @@ controller.getRatingList = function getRatingListForUser(user) {
             // user has no ratings to fill -> generate new ones to him
             getNewRatingPairs(existingUnfilledRatings).then(newPairs => {
                 var createOperations = _.reduce(newPairs, (result, ratingPair) => {
-                    result.push(controller.create(user, ratingPair))
+                    result.push(createRating(user, ratingPair))
                     return result;
                 }, []);
 
@@ -77,7 +79,30 @@ controller.getRatingList = function getRatingListForUser(user) {
 };
 
 
-controller.create = function createRating(user, ratingPair) {
+controller.rate = function saveRating(userModel, ratingId, betterImageId) {
+    return db.bookshelf.transaction(function(t) {
+        return RatingModel
+            .forge({ id: ratingId, raterId: userModel.get('id') })
+            .fetch({
+                withRelated: ['firstImage', 'secondImage'],
+                transacting: t
+            })
+            .then(ratingModel => ratingModel.save(
+                { betterImageId, updated_at: new Date() },
+                { transacting: t }
+    })
+    .then(ratingModel => {
+        return ratingModel.serialize();
+    })
+    .catch(error => {
+        var err = new Error('Saving of rating did not succeed');
+        err.status = 400;
+        throw err;
+    });
+};
+
+
+function createRating(user, ratingPair) {
     return RatingModel
         .forge({
             created_at: new Date(),
@@ -86,14 +111,6 @@ controller.create = function createRating(user, ratingPair) {
             secondImageId: ratingPair.secondImageId
         })
         .save();
-};
-
-
-controller.rate = function saveRating(user, ratingId, betterImageId) {
-    return RatingModel
-        .forge({ id: ratingId, raterId: user.get('id') })
-        .fetch()
-        .then(ratingModel => ratingModel.save({ betterImageId }));
 };
 
 
