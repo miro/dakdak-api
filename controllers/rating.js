@@ -154,34 +154,5 @@ function hasUserRated(userRatings, firstImageId, secondImageId) {
 }
 
 
-// function getRatingPairs(imageIdRows) {
-//     const pairs = _.chain(imageIdRows)
-//         .map(item => item.id)
-//         .value();
-
-//     return Promise.resolve(pairs);
-// }
-
-// function getRatingPairs_old(imageIdRows) {
-//     if (imageIdRows.length < NEW_RATING_LIST_LENGTH * 2) {
-//         return new Promise.OperationalError('Not enough image IDs for creating new rating pairs');
-//     }
-
-//     const pairs = _.chain(imageIdRows)
-//         // .groupBy((row, index) => index % 2 === 0 ? 'even' : 'odd')
-//         .map(item => item.id)
-//         .chunk(2)
-//         .map(tuple => {
-//             return {
-//                 firstImageId: tuple[0] < tuple[1] ? tuple[0] : tuple[1],
-//                 secondImageId: tuple[0] < tuple[1] ? tuple[1] : tuple[0]
-//             };
-//         })
-//         .value();
-
-
-//     console.log('pairs', pairs);
-//     return Promise.resolve(pairs);
-// }
 
 module.exports = controller;
