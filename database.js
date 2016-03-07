@@ -157,23 +157,22 @@ bookshelf.knex.schema.hasTable('ratings').then(function(exists) {
 
             // First image and second image makes the "pair" which is rated on this
             // rating entry
-            // TODO: does Postgres have any magic for this?
             t.integer('firstImageId')
                 .unsigned()
                 .references('id').inTable('images')
-                .onDelete('CASCADE');
+                .onDelete('SET NULL');
             t.integer('secondImageId')
                 .unsigned()
                 .references('id').inTable('images')
-                .onDelete('CASCADE');
+                .onDelete('SET NULL');
 
             t.unique(['raterId', 'firstImageId', 'secondImageId']);
 
             // Id for the "winner" of this rating entry
             t.integer('betterImageId')
                 .unsigned()
-                .onDelete('CASCADE');
                 .references('id').inTable('images')
+                .onDelete('SET NULL');
         });
     }
 });
