@@ -134,10 +134,7 @@ function* generatePairs(userRatings, images) {
     for (var tuple of G.combination(images, 2)) {
         // Get only pairs which are not yet rated
         if (!hasUserRated(userRatings, tuple[0], tuple[1])) {
-            // Get only pairs where first id is smaller than the second
-            if (tuple[0] < tuple[1]) {
-                yield tuple;
-            }
+            yield tuple;
         }
     }
 }
