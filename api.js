@@ -181,6 +181,7 @@ module.exports = function(app) {
 
 
     // # Debugging
+    // TODO allow this only in development-env
     app.post('/api/v0/echo', function(req, res, next) {
         console.log(req.body);
         console.log(req.params);
