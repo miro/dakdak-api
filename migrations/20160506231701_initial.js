@@ -112,10 +112,11 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-    return knex.schema.dropTable('organisations')
-        .then(() => knex.schema.dropTable('invitations'))
-        .then(() => knex.schema.dropTable('persons'))
-        .then(() => knex.schema.dropTable('spots'))
+    return Promise.resolve()
+        .then(() => knex.schema.dropTable('images'))
         .then(() => knex.schema.dropTable('users'))
-        .then(() => knex.schema.dropTable('images'));
+        .then(() => knex.schema.dropTable('spots'))
+        .then(() => knex.schema.dropTable('persons'))
+        .then(() => knex.schema.dropTable('invitations'))
+        .then(() => knex.schema.dropTable('organisations'));
 };

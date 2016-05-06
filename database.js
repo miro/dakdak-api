@@ -1,10 +1,8 @@
-var config              = require('./configurator.js');
+var dbConfig            = require('./configurator.js').dbConfig;
 
-var knex                = require('knex')(config.dbConfig);
+var knex                = require('knex')(dbConfig);
 var bookshelf           = require('bookshelf')(knex);
 var _                   = require('lodash');
-
-
 
 
 // # Define models
@@ -72,5 +70,7 @@ module.exports = {
     bookshelf: bookshelf,
     models: models,
     types: types,
+
+    config: dbConfig,
     knex: bookshelf.knex
 };
