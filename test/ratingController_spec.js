@@ -1,17 +1,26 @@
 'use strict';
 var expect              = require('chai').expect;
 var assert              = require('chai').assert;
+var should              = require('chai').should;
+var knexUtils           = require('./utils/knex');
+
+var Promise             = require('bluebird');
 
 var createUser          = require('./test-utils').createUser;
 
 const ctrl              = require('../controllers/rating');
 
 
-// TODO: reset&set DB somehow
-
 const userModel = createUser(500, 1);
 
 describe('ratingController', () => {
+    before((done) => {
+        knexUtils.migrateAllDownAndUp()
+        .then(() => knexUtils.runSeeds())
+        .then(() => done());
+    });
+
+
     it('fetches ratings successfully', () => {
         return ctrl.getRatingList(userModel).then(list => {
             assert(list.length > 0);
@@ -47,6 +56,8 @@ describe('ratingController', () => {
             );
         })
         .then(savedRatingItem => {
+            // savedRatingItem.betterImageId); // return the saved "winner id"
+            // console.log('final state', savedRatingItem);
             return {
                 secondImageId: savedRatingItem.secondImageId,
                 betterImageId: savedRatingItem.betterImageId

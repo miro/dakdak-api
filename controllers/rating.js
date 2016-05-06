@@ -10,23 +10,7 @@
 //  Cheers to Kimmo Brunfeldt - this solution is heavily inspired by his example:
 //  https://github.com/kimmobrunfeldt/dakdak-problem/blob/master/get-pairs.js
 
-
-
-// The Elo rating system is a method for calculating the relative skill levels of players in
-// two-player games such as chess. It is named after its creator Arpad Elo, a Hungarian-born American
-// physics professor.
-//
-// The heart of the Elo ranking is the "Win Expectancy" expressed as a probability that one player
-// will beat another based on the difference between their rankings. The Win Expectancy is defined as:
-//
-//           We = 1/(10^(-D/F) + 1)
-//
-// Where D equals the difference between the two players' ratings and F is the "rating interval
-// scale weight factor". Bonzini set the ranking interval sizes to 500 and the weight factor to 1000.
-//
-// In the Bonzini system, if you win your rating goes up by an interval constant times the We.
-// The loser's rating goes down by an equal amount. The Elo system is a zero sum system. The only way
-// to add points to the league is to add more players.
+// http://stackoverflow.com/questions/164831/how-to-rank-a-million-images-with-a-crowdsourced-sort
 'use strict';
 
 var _                   = require('lodash');
@@ -55,23 +39,26 @@ var controller = {};
 // do we need transaction in here?
 controller.getRatingList = function getRatingListForUser(user) {
 
-    return fetchUnrated(user)
-    .then(existingUnfilledRatings => {
+    return fetchUnrated(user).then(existingUnfilledRatings => {
         if (existingUnfilledRatings.length > 0) {
             // user has unfilled ratings -> return them
-            log.debug('Rating pairs found', existingUnfilledRatings.length)
-            return Promise.resolve(existingUnfilledRatings);
+            log.debug('Rating pairs found', existingUnfilledRatings.length);
+            // log.debug(existingUnfilledRatings);
+            // return Promise.resolve(existingUnfilledRatings);
+            return existingUnfilledRatings;
         } else {
             // user has no ratings to fill -> generate new ones to him
-            getNewRatingPairs(existingUnfilledRatings).then(newPairs => {
+            log.debug('No pairs found for user - generating');
+
+            return getNewRatingPairs(existingUnfilledRatings).then(newPairs => {
                 var createOperations = _.reduce(newPairs, (result, ratingPair) => {
-                    result.push(createRating(user, ratingPair))
+                    result.push(createRating(user, ratingPair));
                     return result;
                 }, []);
 
                 return Promise.all(createOperations)
                 .then(models => {
-                    return fetchUnrated(user);
+                    return Promise.resolve(fetchUnrated(user));
                 });
             });
         }
@@ -90,13 +77,12 @@ controller.rate = function saveRating(userModel, ratingId, betterImageId) {
             .then(ratingModel => ratingModel.save(
                 { betterImageId, updated_at: new Date() },
                 { transacting: t }
+            ));
     })
-    .then(ratingModel => {
-        return ratingModel.serialize();
-    })
+    .then(ratingModel => ratingModel.serialize())
     .catch(error => {
         var err = new Error('Saving of rating did not succeed');
-        err.status = 400;
+        err.status = 500;
         throw err;
     });
 };
