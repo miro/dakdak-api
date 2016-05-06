@@ -44,4 +44,18 @@ utils.setEmptyStringsNull = function(object) {
     return object;
 }
 
+// Inserts or updates a row to table
+// applied from https://github.com/futurice/wappuapp-backend/blob/master/src/util/seeds.js
+utils.insertOrUpdate = function(knex, table, row) {
+    return knex(table).select().where('id', row.id)
+        .then(rows => {
+            if (rows.length > 0) {
+                return knex(table).where('id', row.id).update(row);
+            } else {
+                return knex(table).insert(row);
+            }
+        });
+}
+
+
 module.exports = utils;
