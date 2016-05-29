@@ -19,16 +19,12 @@ var G                   = require('generatorics');
 
 var db                  = require('../database');
 var imageController     = require('./image');
+var eloController       = require('./elo');
 var log                 = require('../log');
 
-var knex                = db.knex;
 var RatingModel         = db.models.Rating;
-var ImageModel          = db.models.Image;
 
-const IMAGES_TABLE      = 'images';
-const RATINGS_TABLE     = 'ratings';
-
-const NEW_RATING_LIST_LENGTH = 10;
+const NEW_RATING_LIST_LENGTH = 10; // how many rating models will be generated in one batch
 var controller = {};
 
 
@@ -37,7 +33,7 @@ var controller = {};
 // If user has "unfilled rating pairs", they are returned instead
 // TODO this fails the tests when there is generating of the pairs take place ->
 // do we need transaction in here?
-controller.getRatingList = function getRatingListForUser(user) {
+controller.getList = function getRatingListForUser(user) {
 
     return fetchUnrated(user).then(existingUnfilledRatings => {
         if (existingUnfilledRatings.length > 0) {
@@ -67,25 +63,65 @@ controller.getRatingList = function getRatingListForUser(user) {
 
 
 controller.rate = function saveRating(userModel, ratingId, betterImageId) {
-    return db.bookshelf.transaction(function(t) {
-        return RatingModel
+
+    return Promise.resolve()
+        .then(() => db.bookshelf.transaction(transacting =>
+            RatingModel
             .forge({ id: ratingId, raterId: userModel.get('id') })
             .fetch({
                 withRelated: ['firstImage', 'secondImage'],
-                transacting: t
+                transacting
             })
-            .then(ratingModel => ratingModel.save(
-                { betterImageId, updated_at: new Date() },
-                { transacting: t }
-            ));
-    })
-    .then(ratingModel => ratingModel.serialize())
-    .catch(error => {
-        var err = new Error('Saving of rating did not succeed');
-        err.status = 500;
-        throw err;
-    });
+            .then(ratingModel => {
+                let firstImage = ratingModel.related('firstImage');
+                let secondImage = ratingModel.related('secondImage');
+
+                if (betterImageId !== firstImage.get('id') &&
+                    betterImageId !== secondImage.get('id')) {
+                    throw new Error('Invalid betterImageId');
+                }
+                const firstImageWins = betterImageId === firstImage.get('id');
+
+                // count the "reward" & new points for this "matchup"
+                const newRatings = firstImageWins ?
+                    eloController.calculateNewRatings(
+                        firstImage.get('rating'),
+                        secondImage.get('rating')
+                    )
+                :
+                    eloController.calculateNewRatings(
+                        secondImage.get('rating'),
+                        firstImage.get('rating')
+                    );
+
+
+                // save everything
+                return Promise.all([
+                    ratingModel.save(
+                        { betterImageId, updated_at: new Date() },
+                        { transacting }
+                    ),
+                    firstImage.save(
+                        { rating: firstImageWins ? newRatings.winner : newRatings.loser },
+                        { transacting }
+                    ),
+                    secondImage.save(
+                        { rating: firstImageWins ? newRatings.loser : newRatings.winner },
+                        { transacting }
+                    )
+                ]);
+            })
+            .then(result => result[0]) // pick the ratingModel from result array
+            .then(ratingModel => ratingModel.serialize())
+        ))
+        .catch(error => {
+            log.error(error);
+            var err = new Error('Saving of rating did not succeed');
+            err.status = 500;
+            throw err;
+        });
 };
+
 
 
 function createRating(user, ratingPair) {

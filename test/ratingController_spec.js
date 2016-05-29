@@ -22,14 +22,14 @@ describe('ratingController', () => {
 
 
     it('fetches ratings successfully', () => {
-        return ctrl.getRatingList(userModel).then(list => {
+        return ctrl.getList(userModel).then(list => {
             assert(list.length > 0);
         });
     });
 
 
     it('does not allow to set better image to random id', () => {
-        var p = ctrl.getRatingList(userModel)
+        var p = ctrl.getList(userModel)
         .then(list => {
             let ratingItem = list[0];
 
@@ -44,7 +44,7 @@ describe('ratingController', () => {
     });
 
     it('allows basic rating of ratingItem', () => {
-        var p = ctrl.getRatingList(userModel)
+        return ctrl.getList(userModel)
         .then(list => {
             // Pick the first item from the list
             let ratingItem = list[0];
@@ -56,16 +56,12 @@ describe('ratingController', () => {
             );
         })
         .then(savedRatingItem => {
-            // savedRatingItem.betterImageId); // return the saved "winner id"
-            // console.log('final state', savedRatingItem);
             return {
                 secondImageId: savedRatingItem.secondImageId,
                 betterImageId: savedRatingItem.betterImageId
             };
-        });
-
-        // return expect(p).to.become(result => {
-        return p.then(result => {
+        })
+        .then(result => {
             assert.equal(result.secondImageId, result.betterImageId, 'Second image should be set to better image');
         });
     });

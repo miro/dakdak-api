@@ -9,7 +9,6 @@ var jwt             = require('express-jwt');
 var http            = require('http');
 
 var config          = require('./configurator');
-var api             = require('./api');
 var log             = require('./log');
 var authService     = require('./services/auth');
 var tokenService    = require('./services/token');
@@ -80,9 +79,9 @@ app.get('/auth/google/callback',
 );
 
 
-
 // # APIs
 require('./api')(app);
+require('./rating-api')(app);
 
 // Catch all 404 route (this needs to be last)
 app.get('*', function(req, res, next) {
