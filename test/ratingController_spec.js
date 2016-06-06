@@ -4,8 +4,6 @@ var assert              = require('chai').assert;
 var should              = require('chai').should;
 var knexUtils           = require('./utils/knex');
 
-var Promise             = require('bluebird');
-
 var createUser          = require('./test-utils').createUser;
 
 const ctrl              = require('../controllers/rating');
@@ -55,14 +53,18 @@ describe('ratingController', () => {
                 ratingItem.secondImage.id
             );
         })
-        .then(savedRatingItem => {
-            return {
-                secondImageId: savedRatingItem.secondImageId,
-                betterImageId: savedRatingItem.betterImageId
-            };
-        })
-        .then(result => {
-            assert.equal(result.secondImageId, result.betterImageId, 'Second image should be set to better image');
+        .then(rating => {
+            assert.equal(
+                rating.secondImageId,
+                rating.betterImageId,
+                'Second image should be set to better image'
+            );
+
+            assert.isAbove(
+                rating.secondImage.rating,
+                rating.firstImage.rating,
+                'For the first rating ever winner image should have more points than loser'
+            );
         });
     });
 });
