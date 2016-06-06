@@ -2,19 +2,15 @@
 
 var express         = require('express');
 var bodyParser      = require('body-parser');
-var Promise         = require('bluebird');
-var _               = require('lodash');
 var passport        = require('passport');
 var jwt             = require('express-jwt');
 var http            = require('http');
 
 var config          = require('./configurator');
 var log             = require('./log');
-var authService     = require('./services/auth');
 var tokenService    = require('./services/token');
 
 var app             = express();
-
 
 
 // ### Config

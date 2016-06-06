@@ -2,12 +2,9 @@
 // does those .error blocks even work properly?! =DD
 
 // # Imports
-var Promise = require('bluebird');
 var _       = require('lodash');
 var multer  = require('multer');
 
-var config              = require('./configurator');
-var db                  = require('./database');
 var log                 = require('./log');
 var utils               = require('./utils');
 

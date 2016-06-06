@@ -1,4 +1,4 @@
-var Promise 		= require('bluebird');
+var log             = require('./log');
 var _               = require('lodash');
 
 var utils = {};
@@ -37,7 +37,7 @@ utils.setEmptyStringsNull = function(object) {
     // fields - otherwise DB barfs up
     for (var prop in object) {
         if (_.isString(object[prop])) {
-            object[prop] = (object[prop].length > 0) ? object[prop] : null;
+            object[prop] = object[prop].length > 0 ? object[prop] : null;
         }
     }
 
