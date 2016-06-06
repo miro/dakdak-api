@@ -31,11 +31,9 @@ var controller = {};
 
 // Creates list of new "rating pairs" to the user.
 // If user has "unfilled rating pairs", they are returned instead
-// TODO this fails the tests when there is generating of the pairs take place ->
-// do we need transaction in here?
-controller.getList = function getRatingListForUser(user) {
+controller.getList = function getRatingListForUser(raterDeviceId) {
 
-    return fetchUnrated(user).then(existingUnfilledRatings => {
+    return fetchUnrated(raterDeviceId).then(existingUnfilledRatings => {
         if (existingUnfilledRatings.length > 0) {
             // user has unfilled ratings -> return them
             log.debug('Rating pairs found', existingUnfilledRatings.length);
@@ -48,13 +46,13 @@ controller.getList = function getRatingListForUser(user) {
 
             return getNewRatingPairs(existingUnfilledRatings).then(newPairs => {
                 var createOperations = _.reduce(newPairs, (result, ratingPair) => {
-                    result.push(createRating(user, ratingPair));
+                    result.push(createRating(raterDeviceId, ratingPair));
                     return result;
                 }, []);
 
                 return Promise.all(createOperations)
                 .then(models => {
-                    return Promise.resolve(fetchUnrated(user));
+                    return Promise.resolve(fetchUnrated(raterDeviceId));
                 });
             });
         }
@@ -62,12 +60,12 @@ controller.getList = function getRatingListForUser(user) {
 };
 
 
-controller.rate = function saveRating(userModel, ratingId, betterImageId) {
+controller.rate = function saveRating(raterDeviceId, ratingId, betterImageId) {
 
     return Promise.resolve()
         .then(() => db.bookshelf.transaction(transacting =>
             RatingModel
-            .forge({ id: ratingId, raterId: userModel.get('id') })
+            .forge({ id: ratingId, raterDeviceId })
             .fetch({
                 withRelated: ['firstImage', 'secondImage'],
                 transacting
@@ -124,11 +122,11 @@ controller.rate = function saveRating(userModel, ratingId, betterImageId) {
 
 
 
-function createRating(user, ratingPair) {
+function createRating(raterDeviceId, ratingPair) {
     return RatingModel
         .forge({
+            raterDeviceId,
             created_at: new Date(),
-            raterId: user.get('id'),
             firstImageId: ratingPair.firstImageId,
             secondImageId: ratingPair.secondImageId
         })
@@ -186,11 +184,11 @@ function hasUserRated(userRatings, firstImageId, secondImageId) {
   return index !== -1;
 }
 
-function fetchUnrated(user) {
+function fetchUnrated(raterDeviceId) {
     return RatingModel.forge()
     .query(function(qb) {
         qb.whereNull('betterImageId');
-        qb.andWhere('raterId', '=', user.get('id'));
+        qb.andWhere('raterDeviceId', '=', raterDeviceId);
     })
     .fetchAll({
         withRelated: ['firstImage', 'secondImage']

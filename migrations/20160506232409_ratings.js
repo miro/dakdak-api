@@ -4,10 +4,12 @@ exports.up = function(knex, Promise) {
         t.timestamps();
 
         // Who is making this rating
-        t.integer('raterId')
-            .unsigned()
-            .references('id').inTable('users')
-            .onDelete('SET NULL');
+        //
+        // To make developing of native app easier at this point,
+        // this does NOT reference anything in our Users-table.
+        //
+        // (Perhaps one of those decisions you regret later on...)
+        t.string('raterDeviceId');
 
         // First image and second image makes the "pair" which is rated on this
         // rating entry
@@ -20,7 +22,7 @@ exports.up = function(knex, Promise) {
             .references('id').inTable('images')
             .onDelete('SET NULL');
 
-        t.unique(['raterId', 'firstImageId', 'secondImageId']);
+        t.unique(['raterDeviceId', 'firstImageId', 'secondImageId']);
 
         // Id for the "winner" of this rating entry
         t.integer('betterImageId')
