@@ -49,6 +49,15 @@ module.exports = function(app) {
         .catch(error => next(error));
     });
 
+    // ## Latest images
+    app.get('/api/v0/images/id/:imageId', function(req, res, next) {
+        // In here storageIds are used on identifying the images.
+        return imageController.get(req.params.imageId)
+        .then(result => handleResult(result, res, next))
+        .catch(error => next(error));
+    });
+
+    // # Authenticated routes
 
     // # Basic bulk fetches
     //

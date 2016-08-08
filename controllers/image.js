@@ -113,12 +113,24 @@ controller.getLatest = function() {
         ]});
 };
 
+controller.get = function(storageId) {
+    if (!storageId) {
+        throw new Error('StorageId is required on image get!');
+    } else {
+        return db.models.Image.forge()
+        .query('where', 'storageId', '=', storageId)
+        .fetch({ withRelated: [
+            'rider', 'photographer', 'spot', 'organisation'
+        ]});
+    }
+}
+
 
 // # Public API (insecure functions) -------------------------------------------------
 //
 controller.insecure.getPublicImages = function() {
     return db.models.Image.forge()
-        // TODO public
+        // TODO logic for showing only the "public" images
         .fetchAll();
 }
 
